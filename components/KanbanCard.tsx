@@ -66,12 +66,22 @@ export function KanbanCard({ task, labels, onDelete, onEdit, onToggleTodayTask, 
       {...attributes}
       {...listeners}
       onClick={handleClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleClick()
+        }
+      }}
+      tabIndex={0}
+      role="button"
+      aria-label={`Task: ${task.title}`}
       className={`
         group relative bg-surface-raised border-subtle rounded-xl p-4 mb-3
         cursor-grab active:cursor-grabbing
         shadow-card hover:shadow-glow-sm
         transition-all duration-200 ease-out
         hover:-translate-y-0.5
+        focus-visible:shadow-focus-ring focus-visible:outline-none
         ${isDragging ? 'opacity-60 scale-[1.02] shadow-glow-md rotate-1' : ''}
       `}
     >
@@ -99,8 +109,8 @@ export function KanbanCard({ task, labels, onDelete, onEdit, onToggleTodayTask, 
                   onFocus(task.id)
                 }}
                 title="Focus on this task"
-                className="opacity-0 group-hover:opacity-100 text-ink-faint hover:text-cyan-400
-                  p-1 -m-1 transition-all duration-150"
+                className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-ink-faint hover:text-cyan-400
+                  p-1 -m-1 transition-all duration-150 rounded focus-visible:text-cyan-400"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
@@ -115,11 +125,11 @@ export function KanbanCard({ task, labels, onDelete, onEdit, onToggleTodayTask, 
                   onToggleTodayTask(task.id)
                 }}
                 title={task.isTodayTask ? "Remove from Today's 3" : canAddTodayTask ? "Add to Today's 3" : "Today's 3 is full"}
-                className={`p-1 -m-1 transition-all duration-150 ${
+                className={`p-1 -m-1 transition-all duration-150 rounded ${
                   task.isTodayTask
                     ? 'text-amber-glow'
                     : canAddTodayTask
-                      ? 'opacity-0 group-hover:opacity-100 text-ink-faint hover:text-amber-glow'
+                      ? 'opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-ink-faint hover:text-amber-glow focus-visible:text-amber-glow'
                       : 'opacity-0 group-hover:opacity-50 text-ink-faint cursor-not-allowed'
                 }`}
                 disabled={!task.isTodayTask && !canAddTodayTask}
@@ -135,8 +145,9 @@ export function KanbanCard({ task, labels, onDelete, onEdit, onToggleTodayTask, 
                 e.stopPropagation()
                 onDelete(task.id)
               }}
-              className="opacity-0 group-hover:opacity-100 text-ink-faint hover:text-rose-accent
-                text-lg leading-none p-1 -m-1 transition-all duration-150"
+              title="Delete task"
+              className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-ink-faint hover:text-rose-accent focus-visible:text-rose-accent
+                text-lg leading-none p-1 -m-1 transition-all duration-150 rounded"
             >
               ×
             </button>

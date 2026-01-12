@@ -113,9 +113,10 @@ export function KanbanColumn({ id, title, tasks, labels, onAddTask, onDeleteTask
             border border-dashed border-ink-faint/30 hover:border-amber-glow/50
             rounded-xl transition-all duration-200
             hover:bg-surface-base/30 hover:shadow-glow-sm
+            focus-visible:border-amber-glow/50 focus-visible:bg-surface-base/30 focus-visible:text-ink-rich
             group"
         >
-          <span className="group-hover:text-amber-glow transition-colors">+</span>
+          <span className="group-hover:text-amber-glow group-focus-visible:text-amber-glow transition-colors">+</span>
           {' '}Add task
         </button>
       )}

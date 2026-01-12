@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Task, Label, Priority, EnergyLevel, Subtask, PRIORITY_CONFIG, ENERGY_CONFIG } from '@/types'
 
 interface AddTaskModalProps {
@@ -21,13 +21,36 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
   const [selectedLabels, setSelectedLabels] = useState<string[]>(task?.labelIds ?? [])
   const [subtasks, setSubtasks] = useState<Subtask[]>(task?.subtasks ?? [])
   const [newSubtaskText, setNewSubtaskText] = useState('')
+  const modalRef = useRef<HTMLDivElement>(null)
 
+  // Handle escape key and focus trapping
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+        return
+      }
+
+      // Focus trapping
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+        const firstElement = focusableElements[0]
+        const lastElement = focusableElements[focusableElements.length - 1]
+
+        if (e.shiftKey && document.activeElement === firstElement) {
+          e.preventDefault()
+          lastElement?.focus()
+        } else if (!e.shiftKey && document.activeElement === lastElement) {
+          e.preventDefault()
+          firstElement?.focus()
+        }
+      }
     }
-    window.addEventListener('keydown', handleEsc)
-    return () => window.removeEventListener('keydown', handleEsc)
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -76,15 +99,16 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in"
         onClick={onClose}
+        aria-hidden="true"
       />
 
       {/* Modal */}
-      <div className="relative w-full max-w-lg animate-scale-in">
+      <div ref={modalRef} className="relative w-full max-w-lg animate-scale-in">
         <div className="bg-surface-base border-subtle rounded-2xl shadow-2xl overflow-hidden">
           {/* Ambient glow */}
           <div className="absolute -top-20 -left-20 w-40 h-40 bg-amber-glow/20 rounded-full blur-3xl" />
@@ -92,9 +116,10 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
 
           {/* Header */}
           <div className="relative flex items-center justify-between p-5 border-b border-white/5">
-            <h2 className="font-display text-xl font-medium text-ink-rich">{isEditing ? 'Edit Task' : 'New Task'}</h2>
+            <h2 id="modal-title" className="font-display text-xl font-medium text-ink-rich">{isEditing ? 'Edit Task' : 'New Task'}</h2>
             <button
               onClick={onClose}
+              aria-label="Close modal"
               className="text-ink-muted hover:text-ink-rich transition-colors p-1 hover:bg-surface-raised rounded-lg"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -52,7 +52,10 @@ export function TodoList({ todos, setTodos, onPromote }: TodoListProps) {
             <button
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
-              className="text-ink-faint hover:text-ink-muted transition-colors p-0.5"
+              onFocus={() => setShowTooltip(true)}
+              onBlur={() => setShowTooltip(false)}
+              className="text-ink-faint hover:text-ink-muted transition-colors p-0.5 rounded"
+              aria-label="Learn about todos vs tasks"
             >
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -106,13 +109,14 @@ export function TodoList({ todos, setTodos, onPromote }: TodoListProps) {
               {/* Checkbox */}
               <button
                 onClick={() => toggleTodo(todo.id)}
+                aria-label={todo.completed ? `Mark "${todo.text}" incomplete` : `Mark "${todo.text}" complete`}
                 className={`
                   w-[18px] h-[18px] rounded-md flex-shrink-0
                   flex items-center justify-center
                   border transition-all duration-200
                   ${todo.completed
                     ? 'bg-cyan-400 border-cyan-400'
-                    : 'border-ink-faint/40 hover:border-cyan-400/60'
+                    : 'border-ink-faint/40 hover:border-cyan-400/60 focus-visible:border-cyan-400/60'
                   }
                 `}
               >
@@ -138,8 +142,8 @@ export function TodoList({ todos, setTodos, onPromote }: TodoListProps) {
                 <button
                   onClick={() => onPromote(todo.text, todo.id)}
                   title="Promote to Task"
-                  className="opacity-0 group-hover:opacity-100 text-ink-faint hover:text-amber-glow
-                    transition-all duration-150 p-1 -m-1"
+                  className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-ink-faint hover:text-amber-glow focus-visible:text-amber-glow
+                    transition-all duration-150 p-1 -m-1 rounded"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -150,8 +154,9 @@ export function TodoList({ todos, setTodos, onPromote }: TodoListProps) {
               {/* Delete */}
               <button
                 onClick={() => deleteTodo(todo.id)}
-                className="opacity-0 group-hover:opacity-100 text-ink-faint hover:text-rose-accent
-                  transition-all duration-150 p-1 -m-1"
+                title="Delete todo"
+                className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-ink-faint hover:text-rose-accent focus-visible:text-rose-accent
+                  transition-all duration-150 p-1 -m-1 rounded"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
