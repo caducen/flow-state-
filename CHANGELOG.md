@@ -7,10 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### To Do
+### Roadmap
+
+**Phase 2: Database (Supabase)**
+- Set up Supabase project
+- Create database schema for tasks, todos, notes
+- Replace localStorage with Supabase persistence
+
+**Phase 3: Authentication (Supabase Auth)**
+- Add user sign-up and login
+- Link data to user accounts
+- Protect routes for authenticated users
+
+**Phase 4: AI Integration (Claude API)**
+- Add AI-powered task suggestions
+- Smart task breakdown into subtasks
+- Natural language task creation
+
+**Phase 5: Deployment (Vercel)**
+- Deploy to production
+- Set up environment variables
+- Configure custom domain (optional)
+
+**Phase 6: Payments (Stripe)**
+- Add subscription tiers
+- Integrate Stripe checkout
+- Manage billing and invoices
+
+### Other
 - Add LICENSE file (MIT or similar)
-- Supabase integration for cloud persistence
-- User authentication
 
 ## [0.1.0] - 2026-01-12
 
