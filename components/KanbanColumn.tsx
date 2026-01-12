@@ -15,6 +15,7 @@ interface KanbanColumnProps {
   onEditTask: (task: Task) => void
   onToggleTodayTask: (id: string) => void
   canAddTodayTask: boolean
+  onFocusTask: (id: string) => void
 }
 
 const COLUMN_ACCENTS: Record<TaskStatus, string> = {
@@ -50,7 +51,7 @@ const EMPTY_STATE_CONFIG: Record<TaskStatus, { message: string; icon: React.Reac
   },
 }
 
-export function KanbanColumn({ id, title, tasks, labels, onAddTask, onDeleteTask, onEditTask, onToggleTodayTask, canAddTodayTask }: KanbanColumnProps) {
+export function KanbanColumn({ id, title, tasks, labels, onAddTask, onDeleteTask, onEditTask, onToggleTodayTask, canAddTodayTask, onFocusTask }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id })
 
   return (
@@ -87,6 +88,7 @@ export function KanbanColumn({ id, title, tasks, labels, onAddTask, onDeleteTask
               onEdit={onEditTask}
               onToggleTodayTask={onToggleTodayTask}
               canAddTodayTask={canAddTodayTask}
+              onFocus={onFocusTask}
             />
           ))}
         </SortableContext>

@@ -11,6 +11,7 @@ interface KanbanCardProps {
   onEdit: (task: Task) => void
   onToggleTodayTask: (id: string) => void
   canAddTodayTask: boolean
+  onFocus: (id: string) => void
 }
 
 function isOverdue(dueDate: string | undefined): boolean {
@@ -33,7 +34,7 @@ function formatDueDate(dueDate: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-export function KanbanCard({ task, labels, onDelete, onEdit, onToggleTodayTask, canAddTodayTask }: KanbanCardProps) {
+export function KanbanCard({ task, labels, onDelete, onEdit, onToggleTodayTask, canAddTodayTask, onFocus }: KanbanCardProps) {
   const {
     attributes,
     listeners,
@@ -90,6 +91,22 @@ export function KanbanCard({ task, labels, onDelete, onEdit, onToggleTodayTask, 
             {task.title}
           </h3>
           <div className="flex items-center gap-1">
+            {/* Focus button */}
+            {task.status !== 'complete' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onFocus(task.id)
+                }}
+                title="Focus on this task"
+                className="opacity-0 group-hover:opacity-100 text-ink-faint hover:text-cyan-400
+                  p-1 -m-1 transition-all duration-150"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+                </svg>
+              </button>
+            )}
             {/* Today's 3 star toggle */}
             {task.status !== 'complete' && (
               <button
