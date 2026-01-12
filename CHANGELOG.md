@@ -34,6 +34,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integrate Stripe checkout
 - Manage billing and invoices
 
+### UI Polish Ideas
+- **Favicon & Logo Mark** - Simple, minimal identity for browser tab and app header
+- **Time-Aware Greeting** - Dynamic header based on time of day ("Good morning. What matters today?")
+- **Completion Moment** - Subtle acknowledgment when Today's 3 are complete (gentle glow or message)
+- **Keyboard Shortcuts** - Power user shortcuts (N for new task, F for focus, ? for help)
+- **Empty Board Welcome** - Warm first-time user experience with gentle prompt
+
 ### Other
 - Add LICENSE file (MIT or similar)
 
