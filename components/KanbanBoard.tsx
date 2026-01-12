@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   DndContext,
   DragEndEvent,
@@ -20,6 +20,8 @@ interface KanbanBoardProps {
   setTasks: (tasks: Task[] | ((prev: Task[]) => Task[])) => void
   labels: Label[]
   setLabels: (labels: Label[] | ((prev: Label[]) => Label[])) => void
+  promotedTodo?: { text: string; id: string } | null
+  onPromotedTodoHandled?: () => void
 }
 
 const COLUMNS: { id: TaskStatus; title: string }[] = [
@@ -28,11 +30,23 @@ const COLUMNS: { id: TaskStatus; title: string }[] = [
   { id: 'complete', title: 'Complete' },
 ]
 
-export function KanbanBoard({ tasks, setTasks, labels, setLabels }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, onPromotedTodoHandled }: KanbanBoardProps) {
   const [showModal, setShowModal] = useState(false)
   const [addToStatus, setAddToStatus] = useState<TaskStatus>('todo')
   const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [promotedTitle, setPromotedTitle] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Handle promoted todo from Quick Todos
+  useEffect(() => {
+    if (promotedTodo) {
+      setPromotedTitle(promotedTodo.text)
+      setAddToStatus('todo')
+      setEditingTask(null)
+      setShowModal(true)
+      onPromotedTodoHandled?.()
+    }
+  }, [promotedTodo, onPromotedTodoHandled])
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -131,6 +145,7 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels }: KanbanBoardP
   const handleCloseModal = () => {
     setShowModal(false)
     setEditingTask(null)
+    setPromotedTitle(null)
   }
 
   const handleSubmitTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'status'> & { id?: string }) => {
@@ -233,6 +248,7 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels }: KanbanBoardP
         <AddTaskModal
           labels={labels}
           task={editingTask ?? undefined}
+          initialTitle={promotedTitle ?? undefined}
           onClose={handleCloseModal}
           onSubmit={handleSubmitTask}
         />

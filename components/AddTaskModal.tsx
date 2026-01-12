@@ -6,13 +6,14 @@ import { Task, Label, Priority, PRIORITY_CONFIG } from '@/types'
 interface AddTaskModalProps {
   labels: Label[]
   task?: Task // If provided, we're in edit mode
+  initialTitle?: string // For promoted todos
   onClose: () => void
   onSubmit: (task: Omit<Task, 'id' | 'createdAt' | 'status'> & { id?: string }) => void
 }
 
-export function AddTaskModal({ labels, task, onClose, onSubmit }: AddTaskModalProps) {
+export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: AddTaskModalProps) {
   const isEditing = !!task
-  const [title, setTitle] = useState(task?.title ?? '')
+  const [title, setTitle] = useState(task?.title ?? initialTitle ?? '')
   const [description, setDescription] = useState(task?.description ?? '')
   const [priority, setPriority] = useState<Priority>(task?.priority ?? 'medium')
   const [dueDate, setDueDate] = useState(task?.dueDate ?? '')
