@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Task, Label, Priority, PRIORITY_CONFIG } from '@/types'
+import { Task, Label, Priority, EnergyLevel, PRIORITY_CONFIG, ENERGY_CONFIG } from '@/types'
 
 interface AddTaskModalProps {
   labels: Label[]
@@ -16,6 +16,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
   const [title, setTitle] = useState(task?.title ?? initialTitle ?? '')
   const [description, setDescription] = useState(task?.description ?? '')
   const [priority, setPriority] = useState<Priority>(task?.priority ?? 'medium')
+  const [energyLevel, setEnergyLevel] = useState<EnergyLevel | undefined>(task?.energyLevel)
   const [dueDate, setDueDate] = useState(task?.dueDate ?? '')
   const [selectedLabels, setSelectedLabels] = useState<string[]>(task?.labelIds ?? [])
 
@@ -35,6 +36,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
         title: title.trim(),
         description: description.trim() || undefined,
         priority,
+        energyLevel,
         dueDate: dueDate || undefined,
         labelIds: selectedLabels,
       })
@@ -163,6 +165,38 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
                     transition-all duration-200
                     [color-scheme:dark]"
                 />
+              </div>
+            </div>
+
+            {/* Energy Level */}
+            <div>
+              <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                Energy Required
+                <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
+              </label>
+              <div className="flex gap-2">
+                {(Object.keys(ENERGY_CONFIG) as EnergyLevel[]).map((e) => (
+                  <button
+                    key={e}
+                    type="button"
+                    onClick={() => setEnergyLevel(energyLevel === e ? undefined : e)}
+                    className={`
+                      flex-1 px-3 py-2 text-xs font-medium rounded-lg
+                      border transition-all duration-200
+                      ${energyLevel === e
+                        ? 'border-transparent'
+                        : 'border-subtle bg-surface-raised hover:bg-surface-overlay text-ink-muted'
+                      }
+                    `}
+                    style={energyLevel === e ? {
+                      backgroundColor: ENERGY_CONFIG[e].bgColor,
+                      color: ENERGY_CONFIG[e].color,
+                    } : {}}
+                  >
+                    <span className="mr-1">{ENERGY_CONFIG[e].icon}</span>
+                    {e.charAt(0).toUpperCase() + e.slice(1)}
+                  </button>
+                ))}
               </div>
             </div>
 

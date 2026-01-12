@@ -11,7 +11,7 @@ import {
   closestCorners,
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
-import { Task, TaskStatus, Label, PRIORITY_CONFIG } from '@/types'
+import { Task, TaskStatus, Label, PRIORITY_CONFIG, ENERGY_CONFIG } from '@/types'
 import { KanbanColumn } from './KanbanColumn'
 import { AddTaskModal } from './AddTaskModal'
 
@@ -469,7 +469,7 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, 
                 )}
 
                 {/* Meta info */}
-                <div className="flex items-center gap-3 text-xs text-ink-muted">
+                <div className="flex items-center gap-3 text-xs text-ink-muted flex-wrap">
                   <span
                     className="font-medium px-2 py-0.5 rounded-full"
                     style={{
@@ -479,6 +479,17 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, 
                   >
                     {PRIORITY_CONFIG[focusedTask.priority].label}
                   </span>
+                  {focusedTask.energyLevel && (
+                    <span
+                      className="font-medium px-2 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: ENERGY_CONFIG[focusedTask.energyLevel].bgColor,
+                        color: ENERGY_CONFIG[focusedTask.energyLevel].color,
+                      }}
+                    >
+                      {ENERGY_CONFIG[focusedTask.energyLevel].icon} {ENERGY_CONFIG[focusedTask.energyLevel].label}
+                    </span>
+                  )}
                   {focusedTask.dueDate && (
                     <span className="flex items-center gap-1">
                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

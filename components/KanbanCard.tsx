@@ -2,7 +2,7 @@
 
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { Task, Label, PRIORITY_CONFIG } from '@/types'
+import { Task, Label, PRIORITY_CONFIG, ENERGY_CONFIG } from '@/types'
 
 interface KanbanCardProps {
   task: Task
@@ -168,8 +168,8 @@ export function KanbanCard({ task, labels, onDelete, onEdit, onToggleTodayTask, 
           </div>
         )}
 
-        {/* Footer: Priority badge + Due date */}
-        <div className="flex items-center gap-2 mt-3">
+        {/* Footer: Priority badge + Energy + Due date */}
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
           {/* Priority badge */}
           <span
             className="text-[10px] font-medium px-2 py-0.5 rounded-full"
@@ -180,6 +180,19 @@ export function KanbanCard({ task, labels, onDelete, onEdit, onToggleTodayTask, 
           >
             {priorityConfig.label}
           </span>
+
+          {/* Energy level badge */}
+          {task.energyLevel && (
+            <span
+              className="text-[10px] font-medium px-2 py-0.5 rounded-full"
+              style={{
+                backgroundColor: ENERGY_CONFIG[task.energyLevel].bgColor,
+                color: ENERGY_CONFIG[task.energyLevel].color,
+              }}
+            >
+              {ENERGY_CONFIG[task.energyLevel].icon}
+            </span>
+          )}
 
           {/* Due date */}
           {task.dueDate && (
