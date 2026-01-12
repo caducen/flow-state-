@@ -21,6 +21,33 @@ const COLUMN_ACCENTS: Record<TaskStatus, string> = {
   'complete': 'bg-emerald-400',
 }
 
+const EMPTY_STATE_CONFIG: Record<TaskStatus, { message: string; icon: React.ReactNode }> = {
+  'todo': {
+    message: 'Add a task to get started',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
+      </svg>
+    ),
+  },
+  'in-progress': {
+    message: 'Drag a task here to start',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+      </svg>
+    ),
+  },
+  'complete': {
+    message: 'Nothing completed yet today—small steps count.',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
+      </svg>
+    ),
+  },
+}
+
 export function KanbanColumn({ id, title, tasks, labels, onAddTask, onDeleteTask, onEditTask }: KanbanColumnProps) {
   const { setNodeRef, isOver } = useDroppable({ id })
 
@@ -61,8 +88,13 @@ export function KanbanColumn({ id, title, tasks, labels, onAddTask, onDeleteTask
         </SortableContext>
 
         {tasks.length === 0 && (
-          <div className="flex items-center justify-center h-[200px]">
-            <p className="text-xs text-ink-faint/60 italic">Drop tasks here</p>
+          <div className="flex flex-col items-center justify-center h-[200px] gap-2">
+            <span className="text-ink-faint/40">
+              {EMPTY_STATE_CONFIG[id].icon}
+            </span>
+            <p className="text-xs text-ink-faint/60 text-center px-4 leading-relaxed">
+              {EMPTY_STATE_CONFIG[id].message}
+            </p>
           </div>
         )}
       </div>
