@@ -34,8 +34,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Integrate Stripe checkout
 - Manage billing and invoices
 
+### Design Assets
+- **Logo & Favicon System** - 3D glossy arrow pointer in three color variants:
+  - Green (↗ up-right) — Progress/Positive state
+  - Blue (→ right) — Neutral/Steady state
+  - Red (↘ down-right) — Needs attention state
+  - Style: Solid glossy 3D, polished plastic/ceramic look with highlights and shadows
+  - See `docs/DESIGN_BRIEF.md` for full specifications
+
 ### UI Polish Ideas
-- **Favicon & Logo Mark** - Simple, minimal identity for browser tab and app header
 - **Time-Aware Greeting** - Dynamic header based on time of day ("Good morning. What matters today?")
 - **Completion Moment** - Subtle acknowledgment when Today's 3 are complete (gentle glow or message)
 - **Keyboard Shortcuts** - Power user shortcuts (N for new task, F for focus, ? for help)
