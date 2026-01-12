@@ -15,6 +15,7 @@ export interface Task {
   dueDate?: string // ISO date string
   labelIds: string[]
   createdAt: number
+  isTodayTask?: boolean // Part of "Today's 3"
 }
 
 export interface TodoItem {

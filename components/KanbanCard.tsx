@@ -9,6 +9,8 @@ interface KanbanCardProps {
   labels: Label[]
   onDelete: (id: string) => void
   onEdit: (task: Task) => void
+  onToggleTodayTask: (id: string) => void
+  canAddTodayTask: boolean
 }
 
 function isOverdue(dueDate: string | undefined): boolean {
@@ -31,7 +33,7 @@ function formatDueDate(dueDate: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-export function KanbanCard({ task, labels, onDelete, onEdit }: KanbanCardProps) {
+export function KanbanCard({ task, labels, onDelete, onEdit, onToggleTodayTask, canAddTodayTask }: KanbanCardProps) {
   const {
     attributes,
     listeners,
@@ -87,16 +89,41 @@ export function KanbanCard({ task, labels, onDelete, onEdit }: KanbanCardProps) 
           <h3 className="text-sm font-medium text-ink-rich leading-snug flex-1">
             {task.title}
           </h3>
-          <button
-            onClick={(e) => {
-              e.stopPropagation()
-              onDelete(task.id)
-            }}
-            className="opacity-0 group-hover:opacity-100 text-ink-faint hover:text-rose-accent
-              text-lg leading-none p-1 -m-1 transition-all duration-150"
-          >
-            ×
-          </button>
+          <div className="flex items-center gap-1">
+            {/* Today's 3 star toggle */}
+            {task.status !== 'complete' && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onToggleTodayTask(task.id)
+                }}
+                title={task.isTodayTask ? "Remove from Today's 3" : canAddTodayTask ? "Add to Today's 3" : "Today's 3 is full"}
+                className={`p-1 -m-1 transition-all duration-150 ${
+                  task.isTodayTask
+                    ? 'text-amber-glow'
+                    : canAddTodayTask
+                      ? 'opacity-0 group-hover:opacity-100 text-ink-faint hover:text-amber-glow'
+                      : 'opacity-0 group-hover:opacity-50 text-ink-faint cursor-not-allowed'
+                }`}
+                disabled={!task.isTodayTask && !canAddTodayTask}
+              >
+                <svg className="w-4 h-4" fill={task.isTodayTask ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              </button>
+            )}
+            {/* Delete button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                onDelete(task.id)
+              }}
+              className="opacity-0 group-hover:opacity-100 text-ink-faint hover:text-rose-accent
+                text-lg leading-none p-1 -m-1 transition-all duration-150"
+            >
+              ×
+            </button>
+          </div>
         </div>
 
         {/* Description */}

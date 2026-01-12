@@ -30,12 +30,24 @@ const COLUMNS: { id: TaskStatus; title: string }[] = [
   { id: 'complete', title: 'Complete' },
 ]
 
+type FilterMode = 'all' | 'today'
+
+// Check if a date is today
+function isToday(dateStr: string): boolean {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const date = new Date(dateStr)
+  date.setHours(0, 0, 0, 0)
+  return date.getTime() === today.getTime()
+}
+
 export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, onPromotedTodoHandled }: KanbanBoardProps) {
   const [showModal, setShowModal] = useState(false)
   const [addToStatus, setAddToStatus] = useState<TaskStatus>('todo')
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [promotedTitle, setPromotedTitle] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
+  const [filterMode, setFilterMode] = useState<FilterMode>('all')
 
   // Handle promoted todo from Quick Todos
   useEffect(() => {
@@ -56,21 +68,39 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, 
     })
   )
 
-  // Filter tasks based on search
-  const filteredTasks = useMemo(() => {
-    if (!searchQuery.trim()) return tasks
+  // Get Today's 3 tasks (not completed)
+  const todaysTasks = useMemo(() => {
+    return tasks.filter(t => t.isTodayTask && t.status !== 'complete')
+  }, [tasks])
 
-    const query = searchQuery.toLowerCase()
-    return tasks.filter(task => {
-      const matchesTitle = task.title.toLowerCase().includes(query)
-      const matchesDescription = task.description?.toLowerCase().includes(query)
-      const matchesLabels = task.labelIds.some(id => {
-        const label = labels.find(l => l.id === id)
-        return label?.name.toLowerCase().includes(query)
+  // Filter tasks based on search and today filter
+  const filteredTasks = useMemo(() => {
+    let result = tasks
+
+    // Apply today filter
+    if (filterMode === 'today') {
+      result = result.filter(task => {
+        const isDueToday = task.dueDate && isToday(task.dueDate)
+        return task.isTodayTask || isDueToday
       })
-      return matchesTitle || matchesDescription || matchesLabels
-    })
-  }, [tasks, searchQuery, labels])
+    }
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase()
+      result = result.filter(task => {
+        const matchesTitle = task.title.toLowerCase().includes(query)
+        const matchesDescription = task.description?.toLowerCase().includes(query)
+        const matchesLabels = task.labelIds.some(id => {
+          const label = labels.find(l => l.id === id)
+          return label?.name.toLowerCase().includes(query)
+        })
+        return matchesTitle || matchesDescription || matchesLabels
+      })
+    }
+
+    return result
+  }, [tasks, searchQuery, labels, filterMode])
 
   const getTasksByStatus = (status: TaskStatus) => {
     return filteredTasks.filter(task => task.status === status)
@@ -173,14 +203,61 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, 
     setTasks(prev => prev.filter(t => t.id !== id))
   }
 
+  const handleToggleTodayTask = (id: string) => {
+    const task = tasks.find(t => t.id === id)
+    if (!task) return
+
+    // If trying to add and already have 3, show gentle nudge
+    if (!task.isTodayTask && todaysTasks.length >= 3) {
+      // Don't add more than 3
+      return
+    }
+
+    setTasks(prev => prev.map(t =>
+      t.id === id ? { ...t, isTodayTask: !t.isTodayTask } : t
+    ))
+  }
+
   const totalTasks = tasks.length
   const filteredCount = filteredTasks.length
+  const canAddTodayTask = todaysTasks.length < 3
 
   return (
     <>
-      {/* Search Bar */}
-      <div className="mb-6">
-        <div className="relative max-w-md">
+      {/* Today's 3 Bar */}
+      {todaysTasks.length > 0 && (
+        <div className="mb-4 p-3 bg-surface-base border-subtle rounded-xl">
+          <div className="flex items-center gap-2 mb-2">
+            <svg className="w-4 h-4 text-amber-glow" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            <span className="text-xs font-medium text-ink-rich">Today's {todaysTasks.length}</span>
+            <span className="text-xs text-ink-faint">/ 3</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {todaysTasks.map(task => (
+              <div
+                key={task.id}
+                className="flex items-center gap-2 px-2.5 py-1.5 bg-surface-raised rounded-lg text-xs"
+              >
+                <span className="text-ink-rich truncate max-w-[150px]">{task.title}</span>
+                <button
+                  onClick={() => handleToggleTodayTask(task.id)}
+                  className="text-ink-faint hover:text-rose-accent transition-colors"
+                >
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Search Bar and Filter */}
+      <div className="mb-6 flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-md">
           <svg
             className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-faint"
             fill="none"
@@ -215,12 +292,39 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, 
             </button>
           )}
         </div>
-        {searchQuery && (
-          <p className="text-xs text-ink-muted mt-2">
-            Showing {filteredCount} of {totalTasks} tasks
-          </p>
-        )}
+
+        {/* Filter Toggle */}
+        <div className="flex items-center gap-1 p-1 bg-surface-base border-subtle rounded-xl">
+          <button
+            onClick={() => setFilterMode('all')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
+              filterMode === 'all'
+                ? 'bg-surface-raised text-ink-rich shadow-sm'
+                : 'text-ink-muted hover:text-ink-rich'
+            }`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setFilterMode('today')}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all duration-200 ${
+              filterMode === 'today'
+                ? 'bg-amber-glow/20 text-amber-glow shadow-sm'
+                : 'text-ink-muted hover:text-ink-rich'
+            }`}
+          >
+            Today
+          </button>
+        </div>
       </div>
+
+      {/* Filter info */}
+      {(searchQuery || filterMode === 'today') && (
+        <p className="text-xs text-ink-muted mb-4">
+          Showing {filteredCount} of {totalTasks} tasks
+          {filterMode === 'today' && ' (Today filter active)'}
+        </p>
+      )}
 
       <DndContext
         sensors={sensors}
@@ -239,6 +343,8 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, 
               onAddTask={handleAddTask}
               onDeleteTask={handleDeleteTask}
               onEditTask={handleEditTask}
+              onToggleTodayTask={handleToggleTodayTask}
+              canAddTodayTask={canAddTodayTask}
             />
           ))}
         </div>
