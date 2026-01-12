@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Task, Label, Priority, EnergyLevel, PRIORITY_CONFIG, ENERGY_CONFIG } from '@/types'
+import { Task, Label, Priority, EnergyLevel, Subtask, PRIORITY_CONFIG, ENERGY_CONFIG } from '@/types'
 
 interface AddTaskModalProps {
   labels: Label[]
@@ -19,6 +19,8 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
   const [energyLevel, setEnergyLevel] = useState<EnergyLevel | undefined>(task?.energyLevel)
   const [dueDate, setDueDate] = useState(task?.dueDate ?? '')
   const [selectedLabels, setSelectedLabels] = useState<string[]>(task?.labelIds ?? [])
+  const [subtasks, setSubtasks] = useState<Subtask[]>(task?.subtasks ?? [])
+  const [newSubtaskText, setNewSubtaskText] = useState('')
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -39,8 +41,30 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
         energyLevel,
         dueDate: dueDate || undefined,
         labelIds: selectedLabels,
+        subtasks: subtasks.length > 0 ? subtasks : undefined,
       })
     }
+  }
+
+  const addSubtask = () => {
+    if (newSubtaskText.trim()) {
+      setSubtasks(prev => [...prev, {
+        id: crypto.randomUUID(),
+        text: newSubtaskText.trim(),
+        completed: false,
+      }])
+      setNewSubtaskText('')
+    }
+  }
+
+  const removeSubtask = (id: string) => {
+    setSubtasks(prev => prev.filter(s => s.id !== id))
+  }
+
+  const toggleSubtask = (id: string) => {
+    setSubtasks(prev => prev.map(s =>
+      s.id === id ? { ...s, completed: !s.completed } : s
+    ))
   }
 
   const toggleLabel = (labelId: string) => {
@@ -228,6 +252,88 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
                     {label.name}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Subtasks */}
+            <div>
+              <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                Subtasks
+                <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
+              </label>
+
+              {/* Existing subtasks */}
+              {subtasks.length > 0 && (
+                <div className="space-y-2 mb-3">
+                  {subtasks.map(subtask => (
+                    <div
+                      key={subtask.id}
+                      className="flex items-center gap-2 group"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => toggleSubtask(subtask.id)}
+                        className={`
+                          w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center
+                          transition-all duration-200
+                          ${subtask.completed
+                            ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
+                            : 'border-subtle hover:border-ink-muted'
+                          }
+                        `}
+                      >
+                        {subtask.completed && (
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </button>
+                      <span className={`flex-1 text-sm ${subtask.completed ? 'text-ink-faint line-through' : 'text-ink-rich'}`}>
+                        {subtask.text}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeSubtask(subtask.id)}
+                        className="opacity-0 group-hover:opacity-100 text-ink-faint hover:text-rose-400 transition-all"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add new subtask */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newSubtaskText}
+                  onChange={(e) => setNewSubtaskText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      addSubtask()
+                    }
+                  }}
+                  placeholder="Add a subtask..."
+                  className="flex-1 bg-surface-raised border-subtle rounded-lg px-3 py-2
+                    text-sm text-ink-rich placeholder-ink-faint
+                    focus:border-amber-glow/50 focus:shadow-glow-sm
+                    transition-all duration-200"
+                />
+                <button
+                  type="button"
+                  onClick={addSubtask}
+                  disabled={!newSubtaskText.trim()}
+                  className="px-3 py-2 text-sm bg-surface-raised border-subtle rounded-lg
+                    text-ink-muted hover:text-ink-rich hover:bg-surface-overlay
+                    disabled:opacity-40 disabled:cursor-not-allowed
+                    transition-all duration-200"
+                >
+                  Add
+                </button>
               </div>
             </div>
 

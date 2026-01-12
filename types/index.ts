@@ -8,6 +8,12 @@ export interface Label {
   color: string
 }
 
+export interface Subtask {
+  id: string
+  text: string
+  completed: boolean
+}
+
 export interface Task {
   id: string
   title: string
@@ -17,6 +23,7 @@ export interface Task {
   energyLevel?: EnergyLevel // Energy required: High / Medium / Low
   dueDate?: string // ISO date string
   labelIds: string[]
+  subtasks?: Subtask[]
   createdAt: number
   isTodayTask?: boolean // Part of "Today's 3"
 }

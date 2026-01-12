@@ -168,6 +168,25 @@ export function KanbanCard({ task, labels, onDelete, onEdit, onToggleTodayTask, 
           </div>
         )}
 
+        {/* Subtask progress bar */}
+        {task.subtasks && task.subtasks.length > 0 && (
+          <div className="mt-3">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-1.5 bg-surface-overlay rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-500/70 to-emerald-400/70 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${(task.subtasks.filter(s => s.completed).length / task.subtasks.length) * 100}%`
+                  }}
+                />
+              </div>
+              <span className="text-[10px] text-ink-muted">
+                {task.subtasks.filter(s => s.completed).length}/{task.subtasks.length}
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Footer: Priority badge + Energy + Due date */}
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           {/* Priority badge */}

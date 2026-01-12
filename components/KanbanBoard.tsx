@@ -245,6 +245,16 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, 
     handleExitFocus()
   }
 
+  const handleToggleSubtask = (taskId: string, subtaskId: string) => {
+    setTasks(prev => prev.map(t =>
+      t.id === taskId && t.subtasks
+        ? { ...t, subtasks: t.subtasks.map(s =>
+            s.id === subtaskId ? { ...s, completed: !s.completed } : s
+          )}
+        : t
+    ))
+  }
+
   const totalTasks = tasks.length
   const filteredCount = filteredTasks.length
   const canAddTodayTask = todaysTasks.length < 3
@@ -499,6 +509,59 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, 
                     </span>
                   )}
                 </div>
+
+                {/* Subtasks */}
+                {focusedTask.subtasks && focusedTask.subtasks.length > 0 && (
+                  <div className="pt-2 border-t border-white/5">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-medium text-ink-muted uppercase tracking-wider">
+                        Subtasks
+                      </span>
+                      <span className="text-xs text-ink-faint">
+                        {focusedTask.subtasks.filter(s => s.completed).length}/{focusedTask.subtasks.length} done
+                      </span>
+                    </div>
+                    {/* Progress bar */}
+                    <div className="h-1.5 bg-surface-overlay rounded-full overflow-hidden mb-3">
+                      <div
+                        className="h-full bg-gradient-to-r from-emerald-500/70 to-emerald-400/70 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${(focusedTask.subtasks.filter(s => s.completed).length / focusedTask.subtasks.length) * 100}%`
+                        }}
+                      />
+                    </div>
+                    {/* Subtask list */}
+                    <div className="space-y-2">
+                      {focusedTask.subtasks.map(subtask => (
+                        <button
+                          key={subtask.id}
+                          onClick={() => handleToggleSubtask(focusedTask.id, subtask.id)}
+                          className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-surface-raised transition-colors text-left"
+                        >
+                          <div
+                            className={`
+                              w-5 h-5 rounded border flex-shrink-0 flex items-center justify-center
+                              transition-all duration-200
+                              ${subtask.completed
+                                ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
+                                : 'border-subtle hover:border-ink-muted'
+                              }
+                            `}
+                          >
+                            {subtask.completed && (
+                              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </div>
+                          <span className={`text-sm ${subtask.completed ? 'text-ink-faint line-through' : 'text-ink-rich'}`}>
+                            {subtask.text}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Actions */}
