@@ -62,7 +62,7 @@ export function TodoList({ todos, setTodos, onPromote }: TodoListProps) {
               </svg>
             </button>
             {showTooltip && (
-              <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-surface-overlay border border-white/10 rounded-xl shadow-xl z-50">
+              <div className="absolute right-0 top-full mt-2 w-64 p-3 bg-surface-overlay border border-white/10 rounded-xl shadow-xl z-50">
                 <p className="text-xs text-ink-rich font-medium mb-1.5">Todo vs Task</p>
                 <p className="text-xs text-ink-muted leading-relaxed mb-2">
                   <span className="text-cyan-400">Todo</span> = A reminder. Points your attention to something you shouldn't forget.
