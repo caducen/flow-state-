@@ -2,6 +2,19 @@ export type Priority = 'high' | 'medium' | 'low'
 export type EnergyLevel = 'high' | 'medium' | 'low'
 export type UserState = 'grounded' | 'scattered' | 'tired'
 
+// Point values for task weight calculation
+export const PRIORITY_POINTS: Record<Priority, number> = {
+  high: 3,
+  medium: 2,
+  low: 1,
+}
+
+export const ENERGY_POINTS: Record<EnergyLevel, number> = {
+  high: 3,
+  medium: 2,
+  low: 1,
+}
+
 export interface Label {
   id: string
   name: string
@@ -70,8 +83,39 @@ export const ENERGY_CONFIG: Record<EnergyLevel, { label: string; icon: string; c
   low: { label: 'Low Energy', icon: '🌙', color: '#9a9fd8', bgColor: 'rgba(154, 159, 216, 0.15)' },
 }
 
-export const USER_STATE_CONFIG: Record<UserState, { label: string; icon: string; color: string }> = {
-  grounded: { label: 'Grounded', icon: '🌱', color: '#7ea88f' },
-  scattered: { label: 'Scattered', icon: '🌀', color: '#c9887a' },
-  tired: { label: 'Tired', icon: '😴', color: '#9a9fd8' },
+// Energy Balance by user state (points available for today's tasks)
+export const ENERGY_BALANCE: Record<UserState, number> = {
+  grounded: 14,
+  scattered: 9,
+  tired: 5,
+}
+
+export const USER_STATE_CONFIG: Record<UserState, {
+  label: string
+  icon: string
+  color: string
+  energyBalance: number
+  description: string
+}> = {
+  grounded: {
+    label: 'Grounded',
+    icon: '🌱',
+    color: '#7ea88f',
+    energyBalance: 14,
+    description: 'Full energy, clear mind, ready for challenges',
+  },
+  scattered: {
+    label: 'Scattered',
+    icon: '🌀',
+    color: '#5c9ecf',
+    energyBalance: 9,
+    description: 'Some energy, needs focus, moderate capacity',
+  },
+  tired: {
+    label: 'Tired',
+    icon: '😴',
+    color: '#c9887a',
+    energyBalance: 5,
+    description: 'Limited energy, needs rest, light tasks only',
+  },
 }

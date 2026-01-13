@@ -11,15 +11,19 @@ import {
   closestCorners,
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
-import { Task, TaskStatus, Label, PRIORITY_CONFIG, ENERGY_CONFIG } from '@/types'
+import { Task, TaskStatus, Label, UserState, PRIORITY_CONFIG, ENERGY_CONFIG } from '@/types'
 import { KanbanColumn } from './KanbanColumn'
 import { AddTaskModal } from './AddTaskModal'
+import { OverCapacityDialog } from './OverCapacityDialog'
+import { getTaskWeight, getSelectedWeight, getEnergyBalance } from '@/utils/flowMeter'
 
 interface KanbanBoardProps {
   tasks: Task[]
   setTasks: (tasks: Task[] | ((prev: Task[]) => Task[])) => void
   labels: Label[]
   setLabels: (labels: Label[] | ((prev: Label[]) => Label[])) => void
+  userState: UserState | null
+  setUserState: (state: UserState | null) => void
   promotedTodo?: { text: string; id: string } | null
   onPromotedTodoHandled?: () => void
 }
@@ -41,13 +45,21 @@ function isToday(dateStr: string): boolean {
   return date.getTime() === today.getTime()
 }
 
-export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, onPromotedTodoHandled }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, setTasks, labels, setLabels, userState, setUserState, promotedTodo, onPromotedTodoHandled }: KanbanBoardProps) {
   const [showModal, setShowModal] = useState(false)
   const [addToStatus, setAddToStatus] = useState<TaskStatus>('todo')
   const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [promotedTitle, setPromotedTitle] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterMode, setFilterMode] = useState<FilterMode>('all')
+
+  // Over capacity dialog state
+  const [showOverCapacityDialog, setShowOverCapacityDialog] = useState(false)
+  const [pendingTaskId, setPendingTaskId] = useState<string | null>(null)
+
+  // Calculate energy values
+  const energyBalance = getEnergyBalance(userState)
+  const selectedWeight = getSelectedWeight(tasks)
   const [focusedTaskId, setFocusedTaskId] = useState<string | null>(null)
   const scrollPositionRef = useRef<number>(0)
 
@@ -212,15 +224,59 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, 
     const task = tasks.find(t => t.id === id)
     if (!task) return
 
-    // If trying to add and already have 3, show gentle nudge
-    if (!task.isTodayTask && todaysTasks.length >= 3) {
-      // Don't add more than 3
+    // If removing from today, just do it
+    if (task.isTodayTask) {
+      setTasks(prev => prev.map(t =>
+        t.id === id ? { ...t, isTodayTask: false } : t
+      ))
       return
     }
 
+    // Check if adding this task would exceed energy balance
+    const taskWeight = getTaskWeight(task)
+    const newTotalWeight = selectedWeight + taskWeight
+
+    // If user has selected a state and would go over capacity, show dialog
+    if (userState && newTotalWeight > energyBalance) {
+      setPendingTaskId(id)
+      setShowOverCapacityDialog(true)
+      return
+    }
+
+    // Otherwise, add the task
     setTasks(prev => prev.map(t =>
-      t.id === id ? { ...t, isTodayTask: !t.isTodayTask } : t
+      t.id === id ? { ...t, isTodayTask: true } : t
     ))
+  }
+
+  // Handle confirming over-capacity task addition
+  const handleConfirmOverCapacity = () => {
+    if (pendingTaskId) {
+      setTasks(prev => prev.map(t =>
+        t.id === pendingTaskId ? { ...t, isTodayTask: true } : t
+      ))
+    }
+    setShowOverCapacityDialog(false)
+    setPendingTaskId(null)
+  }
+
+  // Handle changing state from dialog
+  const handleChangeStateFromDialog = (newState: UserState) => {
+    setUserState(newState)
+    // After changing state, add the task
+    if (pendingTaskId) {
+      setTasks(prev => prev.map(t =>
+        t.id === pendingTaskId ? { ...t, isTodayTask: true } : t
+      ))
+    }
+    setShowOverCapacityDialog(false)
+    setPendingTaskId(null)
+  }
+
+  // Close dialog without adding task
+  const handleCloseOverCapacityDialog = () => {
+    setShowOverCapacityDialog(false)
+    setPendingTaskId(null)
   }
 
   const handleFocusTask = (id: string) => {
@@ -257,7 +313,8 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, 
 
   const totalTasks = tasks.length
   const filteredCount = filteredTasks.length
-  const canAddTodayTask = todaysTasks.length < 3
+  // With Flow Meter system, we no longer have a hard limit - the over-capacity dialog handles it
+  const canAddTodayTask = true
 
   return (
     <>
@@ -405,6 +462,20 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels, promotedTodo, 
           initialTitle={promotedTitle ?? undefined}
           onClose={handleCloseModal}
           onSubmit={handleSubmitTask}
+        />
+      )}
+
+      {/* Over Capacity Dialog */}
+      {showOverCapacityDialog && userState && pendingTaskId && (
+        <OverCapacityDialog
+          isOpen={showOverCapacityDialog}
+          onClose={handleCloseOverCapacityDialog}
+          userState={userState}
+          energyBalance={energyBalance}
+          selectedWeight={selectedWeight}
+          newTaskWeight={getTaskWeight(tasks.find(t => t.id === pendingTaskId)!)}
+          onContinue={handleConfirmOverCapacity}
+          onChangeState={handleChangeStateFromDialog}
         />
       )}
 

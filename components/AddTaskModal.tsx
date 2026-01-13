@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { Task, Label, Priority, EnergyLevel, Subtask, PRIORITY_CONFIG, ENERGY_CONFIG } from '@/types'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import { Task, Label, Priority, EnergyLevel, Subtask, PRIORITY_CONFIG, ENERGY_CONFIG, PRIORITY_POINTS, ENERGY_POINTS } from '@/types'
+import { getWeightCategory, WEIGHT_CATEGORY_CONFIG } from '@/utils/flowMeter'
 
 interface AddTaskModalProps {
   labels: Label[]
@@ -22,6 +23,16 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
   const [subtasks, setSubtasks] = useState<Subtask[]>(task?.subtasks ?? [])
   const [newSubtaskText, setNewSubtaskText] = useState('')
   const modalRef = useRef<HTMLDivElement>(null)
+
+  // Calculate task weight from priority + energy
+  const taskWeight = useMemo(() => {
+    const priorityPoints = PRIORITY_POINTS[priority]
+    const energyPoints = ENERGY_POINTS[energyLevel ?? 'medium']
+    return priorityPoints + energyPoints
+  }, [priority, energyLevel])
+
+  const weightCategory = useMemo(() => getWeightCategory(taskWeight), [taskWeight])
+  const weightConfig = WEIGHT_CATEGORY_CONFIG[weightCategory]
 
   // Handle escape key and focus trapping
   useEffect(() => {
@@ -246,6 +257,45 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
                     {e.charAt(0).toUpperCase() + e.slice(1)}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Task Weight Indicator */}
+            <div
+              className="p-4 rounded-xl border transition-all duration-300"
+              style={{
+                backgroundColor: `${weightConfig.color}10`,
+                borderColor: `${weightConfig.color}30`,
+              }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold"
+                    style={{
+                      backgroundColor: `${weightConfig.color}20`,
+                      color: weightConfig.color,
+                    }}
+                  >
+                    {taskWeight}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="text-sm font-semibold"
+                        style={{ color: weightConfig.color }}
+                      >
+                        {weightConfig.label} Task
+                      </span>
+                      <span className="text-xs text-ink-faint">
+                        ({taskWeight} pts)
+                      </span>
+                    </div>
+                    <p className="text-xs text-ink-muted mt-0.5">
+                      {weightConfig.description}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 

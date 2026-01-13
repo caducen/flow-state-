@@ -2,11 +2,12 @@
 
 import { useState, useCallback } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { Task, TodoItem, Note, Label, UserState, DEFAULT_LABELS, USER_STATE_CONFIG } from '@/types'
+import { Task, TodoItem, Note, Label, UserState, DEFAULT_LABELS } from '@/types'
 import { KanbanBoard } from '@/components/KanbanBoard'
 import { TodoList } from '@/components/TodoList'
 import { NoteArea } from '@/components/NoteArea'
 import { QuickTasks, QuickTask } from '@/components/QuickTasks'
+import { CheckInSection } from '@/components/CheckInSection'
 
 export default function Home() {
   const [tasks, setTasks] = useLocalStorage<Task[]>('flow-tasks-v2', [])
@@ -42,38 +43,13 @@ export default function Home() {
         </p>
       </header>
 
-      {/* State Check */}
-      <div className="mb-8 animate-fade-in" style={{ animationDelay: '0.05s' }}>
-        <div className="flex items-center gap-4 flex-wrap">
-          <span className="text-sm text-ink-muted">How are you feeling?</span>
-          <div className="flex gap-2">
-            {(Object.keys(USER_STATE_CONFIG) as UserState[]).map((state) => (
-              <button
-                key={state}
-                onClick={() => setUserState(userState === state ? null : state)}
-                className={`
-                  px-3 py-1.5 text-sm rounded-lg border transition-all duration-200
-                  ${userState === state
-                    ? 'border-transparent'
-                    : 'border-subtle bg-surface-base hover:bg-surface-raised text-ink-muted'
-                  }
-                `}
-                style={userState === state ? {
-                  backgroundColor: `${USER_STATE_CONFIG[state].color}20`,
-                  color: USER_STATE_CONFIG[state].color,
-                } : {}}
-              >
-                <span className="mr-1.5">{USER_STATE_CONFIG[state].icon}</span>
-                {USER_STATE_CONFIG[state].label}
-              </button>
-            ))}
-          </div>
-          {userState && (
-            <span className="text-xs text-ink-faint">
-              (click again to clear)
-            </span>
-          )}
-        </div>
+      {/* State Check-in */}
+      <div className="animate-fade-in" style={{ animationDelay: '0.05s' }}>
+        <CheckInSection
+          userState={userState}
+          setUserState={setUserState}
+          tasks={tasks}
+        />
       </div>
 
       {/* Main Layout */}
@@ -90,6 +66,8 @@ export default function Home() {
             setTasks={setTasks}
             labels={labels}
             setLabels={setLabels}
+            userState={userState}
+            setUserState={setUserState}
             promotedTodo={promotedTodo}
             onPromotedTodoHandled={handlePromotedTodoHandled}
           />
