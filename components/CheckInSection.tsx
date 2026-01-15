@@ -120,7 +120,7 @@ export function CheckInSection({ userState, setUserState, tasks }: CheckInSectio
       {/* Flow Meter */}
       {userState && (
         <div className="mt-6 flex justify-center animate-fade-in">
-          <FlowMeter capacityPercentage={flowMeterPercentage} size={140} />
+          <FlowMeter capacityPercentage={flowMeterPercentage} size={240} />
         </div>
       )}
     </div>

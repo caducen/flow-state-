@@ -8,6 +8,8 @@ import { TodoList } from '@/components/TodoList'
 import { NoteArea } from '@/components/NoteArea'
 import { QuickTasks, QuickTask } from '@/components/QuickTasks'
 import { CheckInSection } from '@/components/CheckInSection'
+import { ThemeToggle } from '@/components/ThemeToggle'
+import { SettingsPanel } from '@/components/SettingsPanel'
 
 export default function Home() {
   const [tasks, setTasks] = useLocalStorage<Task[]>('flow-tasks-v2', [])
@@ -32,15 +34,25 @@ export default function Home() {
     <div className="min-h-screen p-6 md:p-10">
       {/* Header */}
       <header className="mb-10 animate-fade-in">
-        <div className="flex items-baseline gap-3">
-          <h1 className="font-display text-3xl md:text-4xl font-medium text-ink-rich tracking-tight">
-            Flow State
-          </h1>
-          <span className="text-amber-glow text-sm font-mono">●</span>
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="flex items-baseline gap-3">
+              <h1 className="font-display text-3xl md:text-4xl font-medium text-ink-rich tracking-tight">
+                Flow State
+              </h1>
+              <span className="text-amber-glow text-sm font-mono">●</span>
+            </div>
+            <p className="text-ink-muted mt-2 text-sm tracking-wide">
+              Organize your work, stay in the zone
+            </p>
+          </div>
+
+          {/* Theme Toggle + Settings */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <SettingsPanel />
+          </div>
         </div>
-        <p className="text-ink-muted mt-2 text-sm tracking-wide">
-          Organize your work, stay in the zone
-        </p>
       </header>
 
       {/* State Check-in */}

@@ -1,7 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
-import Image from 'next/image'
+import { useRef, useEffect, useState } from 'react'
 import { getCapacityZone, getCapacityMessage, CapacityZone } from '@/utils/flowMeter'
 
 interface FlowMeterProps {
@@ -10,30 +9,17 @@ interface FlowMeterProps {
   showMessage?: boolean
 }
 
-// Frame images mapped to capacity percentage thresholds
-const FRAMES = [
-  { maxPercent: 10, src: '/flow-meter/frame-01-green.png' },
-  { maxPercent: 20, src: '/flow-meter/frame-02-yellow-green.png' },
-  { maxPercent: 35, src: '/flow-meter/frame-03-cyan.png' },
-  { maxPercent: 50, src: '/flow-meter/frame-04-blue.png' },
-  { maxPercent: 65, src: '/flow-meter/frame-05-indigo.png' },
-  { maxPercent: 75, src: '/flow-meter/frame-06-purple.png' },
-  { maxPercent: 85, src: '/flow-meter/frame-07-magenta.png' },
-  { maxPercent: 95, src: '/flow-meter/frame-08-red-orange.png' },
-  { maxPercent: 105, src: '/flow-meter/frame-09-orange.png' },
-  { maxPercent: 115, src: '/flow-meter/frame-10-golden.png' },
-  { maxPercent: 130, src: '/flow-meter/frame-11-red.png' },
-  { maxPercent: Infinity, src: '/flow-meter/frame-12-red-final.png' },
-]
+// Video duration in seconds
+const VIDEO_DURATION = 6.04
 
-// Get the appropriate frame based on capacity percentage
-function getFrameForPercentage(percent: number): string {
-  for (const frame of FRAMES) {
-    if (percent <= frame.maxPercent) {
-      return frame.src
-    }
-  }
-  return FRAMES[FRAMES.length - 1].src
+/**
+ * Calculate video timestamp from capacity percentage
+ * 0% used → 0.00s (green, full energy)
+ * 100% used → 6.04s (red, depleted)
+ */
+function getVideoTimestamp(capacityPercentage: number): number {
+  const clampedPercent = Math.min(Math.max(capacityPercentage, 0), 100)
+  return (clampedPercent / 100) * VIDEO_DURATION
 }
 
 // Get color for the message text based on capacity zone
@@ -49,34 +35,62 @@ function getMessageColor(zone: CapacityZone): string {
 }
 
 export function FlowMeter({ capacityPercentage, size = 120, showMessage = true }: FlowMeterProps) {
-  const frameSrc = useMemo(() => getFrameForPercentage(capacityPercentage), [capacityPercentage])
-  const zone = useMemo(() => getCapacityZone(capacityPercentage), [capacityPercentage])
-  const message = useMemo(() => getCapacityMessage(zone), [zone])
-  const messageColor = useMemo(() => getMessageColor(zone), [zone])
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [isReady, setIsReady] = useState(false)
+
+  const zone = getCapacityZone(capacityPercentage)
+  const message = getCapacityMessage(zone)
+  const messageColor = getMessageColor(zone)
+
+  // Update video timestamp when capacity changes
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video || !isReady) return
+
+    const timestamp = getVideoTimestamp(capacityPercentage)
+    video.currentTime = timestamp
+  }, [capacityPercentage, isReady])
+
+  // Handle video ready state
+  const handleLoadedMetadata = () => {
+    setIsReady(true)
+    // Set initial frame
+    if (videoRef.current) {
+      videoRef.current.currentTime = getVideoTimestamp(capacityPercentage)
+    }
+  }
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      {/* Arrow Image Container */}
+    <div
+      className="flex flex-col items-center gap-3 p-4 rounded-xl"
+      style={{ backgroundColor: '#000000' }}
+    >
+      {/* Video Container */}
       <div
-        className="relative flex items-center justify-center"
+        className="relative flex items-center justify-center overflow-hidden"
         style={{ width: size, height: size }}
       >
-        {/* Preload all frames for smooth transitions */}
-        {FRAMES.map((frame) => (
-          <Image
-            key={frame.src}
-            src={frame.src}
-            alt=""
-            width={size}
-            height={size}
-            className={`
-              absolute inset-0 object-contain
-              transition-opacity duration-500 ease-out
-              ${frame.src === frameSrc ? 'opacity-100' : 'opacity-0'}
-            `}
-            priority={frame.maxPercent <= 50} // Prioritize loading first few frames
-          />
-        ))}
+        <video
+          ref={videoRef}
+          src="/flow-meter/Flow-meter.mp4"
+          muted
+          playsInline
+          preload="auto"
+          onLoadedMetadata={handleLoadedMetadata}
+          className="w-full h-full object-contain"
+          style={{
+            opacity: isReady ? 1 : 0,
+            transition: 'opacity 0.3s ease-out'
+          }}
+        />
+        {/* Loading placeholder */}
+        {!isReady && (
+          <div
+            className="absolute inset-0 flex items-center justify-center bg-black rounded-lg"
+          >
+            <div className="w-8 h-8 border-2 border-gray-600 border-t-blue-500 rounded-full animate-spin" />
+          </div>
+        )}
       </div>
 
       {/* Capacity Message */}

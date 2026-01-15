@@ -4,6 +4,53 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Theme CSS Variables */
+:root {
+  /* Light theme (default) */
+  --surface-deep: #f5f3f0;
+  --surface-base: #faf8f5;
+  --surface-raised: #ffffff;
+  --surface-overlay: #f0ebe5;
+  --ink-rich: #1c1917;
+  --ink-muted: #57534e;
+  --ink-faint: #a8a29e;
+  --amber-glow: #f59e0b;
+  --amber-soft: #fbbf24;
+  --rose-accent: #fb7185;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --scrollbar-thumb: rgba(87, 83, 78, 0.25);
+  --scrollbar-hover: rgba(87, 83, 78, 0.4);
+  --gradient-amber: rgba(245, 158, 11, 0.12);
+  --gradient-rose: rgba(251, 113, 133, 0.08);
+  --noise-opacity: 0.02;
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 8px 30px -4px rgba(0, 0, 0, 0.15);
+}
+
+.dark {
+  /* Dark theme */
+  --surface-deep: #0c0a09;
+  --surface-base: #1c1917;
+  --surface-raised: #262220;
+  --surface-overlay: #2f2b29;
+  --ink-rich: #faf9f7;
+  --ink-muted: #a8a29e;
+  --ink-faint: #57534e;
+  --amber-glow: #f59e0b;
+  --amber-soft: #fbbf24;
+  --rose-accent: #fb7185;
+  --glass-bg: rgba(28, 25, 23, 0.7);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --scrollbar-thumb: rgba(168, 162, 158, 0.2);
+  --scrollbar-hover: rgba(168, 162, 158, 0.35);
+  --gradient-amber: rgba(245, 158, 11, 0.08);
+  --gradient-rose: rgba(251, 113, 133, 0.05);
+  --noise-opacity: 0.03;
+  --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.03);
+  --shadow-hover: 0 8px 30px -4px rgba(0, 0, 0, 0.5);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -16,13 +63,14 @@ html {
 
 body {
   height: 100%;
-  background-color: #0c0a09;
-  color: #faf9f7;
+  background-color: var(--surface-deep);
+  color: var(--ink-rich);
   font-family: 'DM Sans', system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Noise texture overlay */
@@ -31,7 +79,7 @@ body::before {
   position: fixed;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity: 0.03;
+  opacity: var(--noise-opacity);
   pointer-events: none;
   z-index: 9999;
 }
@@ -42,8 +90,8 @@ body::after {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 20% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(251, 113, 133, 0.05) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 50% at 20% 0%, var(--gradient-amber) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 100%, var(--gradient-rose) 0%, transparent 50%);
   pointer-events: none;
   z-index: -1;
 }
@@ -59,12 +107,12 @@ body::after {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(168, 162, 158, 0.2);
+  background: var(--scrollbar-thumb);
   border-radius: 100px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 162, 158, 0.35);
+  background: var(--scrollbar-hover);
 }
 
 /* Typography */
@@ -82,7 +130,7 @@ input, textarea, button {
 
 input::placeholder,
 textarea::placeholder {
-  color: #57534e;
+  color: var(--ink-faint);
 }
 
 /* Focus styles */
@@ -108,26 +156,26 @@ button:focus-visible {
 /* Selection */
 ::selection {
   background: rgba(245, 158, 11, 0.25);
-  color: #faf9f7;
+  color: var(--ink-rich);
 }
 
 /* Utility classes */
 @layer utilities {
   .glass {
-    background: rgba(28, 25, 23, 0.7);
+    background: var(--glass-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
 
   .text-gradient {
-    background: linear-gradient(135deg, #faf9f7 0%, #a8a29e 100%);
+    background: linear-gradient(135deg, var(--ink-rich) 0%, var(--ink-muted) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .border-subtle {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border-subtle);
   }
 
   .hover-lift {
@@ -136,6 +184,16 @@ button:focus-visible {
 
   .hover-lift:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-hover);
   }
+
+  /* Theme-aware backgrounds using CSS variables */
+  .bg-surface-deep { background-color: var(--surface-deep); }
+  .bg-surface-base { background-color: var(--surface-base); }
+  .bg-surface-raised { background-color: var(--surface-raised); }
+  .bg-surface-overlay { background-color: var(--surface-overlay); }
+
+  .text-ink-rich { color: var(--ink-rich); }
+  .text-ink-muted { color: var(--ink-muted); }
+  .text-ink-faint { color: var(--ink-faint); }
 }
