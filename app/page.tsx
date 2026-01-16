@@ -2,12 +2,10 @@
 
 import { useState, useCallback } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { Task, TodoItem, Note, Label, UserState, DEFAULT_LABELS } from '@/types'
+import { Task, Label, UserState, DEFAULT_LABELS } from '@/types'
 import { getSelectedWeight, getEnergyBalance } from '@/utils/flowMeter'
 import { KanbanBoard } from '@/components/KanbanBoard'
-import { TodoList } from '@/components/TodoList'
-import { NoteArea } from '@/components/NoteArea'
-import { QuickTasks, QuickTask } from '@/components/QuickTasks'
+import { QuickTodos, QuickTodo } from '@/components/QuickTodos'
 import { CheckInSection } from '@/components/CheckInSection'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { SettingsPanel } from '@/components/SettingsPanel'
@@ -15,9 +13,7 @@ import { EnergyCursor } from '@/components/EnergyCursor'
 
 export default function Home() {
   const [tasks, setTasks] = useLocalStorage<Task[]>('flow-tasks-v2', [])
-  const [todos, setTodos] = useLocalStorage<TodoItem[]>('flow-todos', [])
-  const [notes, setNotes] = useLocalStorage<Note[]>('flow-notes', [])
-  const [quickTasks, setQuickTasks] = useLocalStorage<QuickTask[]>('flow-quick-tasks', [])
+  const [quickTodos, setQuickTodos] = useLocalStorage<QuickTodo[]>('flow-quick-todos', [])
   const [labels, setLabels] = useLocalStorage<Label[]>('flow-labels', DEFAULT_LABELS)
   const [userState, setUserState] = useLocalStorage<UserState | null>('flow-user-state', null)
   const [energyCursorEnabled, setEnergyCursorEnabled] = useLocalStorage<boolean>('energyCursorEnabled', false)
@@ -26,14 +22,14 @@ export default function Home() {
   const handlePromoteTodo = useCallback((text: string, todoId: string) => {
     setPromotedTodo({ text, id: todoId })
     // Remove the todo after promoting
-    setTodos(prev => prev.filter(t => t.id !== todoId))
-  }, [setTodos])
+    setQuickTodos(prev => prev.filter(t => t.id !== todoId))
+  }, [setQuickTodos])
 
   const handlePromotedTodoHandled = useCallback(() => {
     setPromotedTodo(null)
   }, [])
 
-  // Calculate energy values for the progress bar
+  // Calculate energy values for the cursor and progress bar
   const selectedWeight = getSelectedWeight(tasks)
   const energyBalance = getEnergyBalance(userState)
 
@@ -82,19 +78,18 @@ export default function Home() {
         />
       </div>
 
-      {/* Main Layout */}
+      {/* Main Layout - Two column: Quick Todos + Kanban */}
       <div className="flex flex-col xl:flex-row gap-8">
-        {/* Left Column - Quick Tasks */}
+        {/* Left Column - Quick Todos */}
         <div className="animate-slide-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
-          <QuickTasks
-            tasks={quickTasks}
-            setTasks={setQuickTasks}
-            selectedWeight={selectedWeight}
-            energyBalance={energyBalance}
+          <QuickTodos
+            todos={quickTodos}
+            setTodos={setQuickTodos}
+            onPromote={handlePromoteTodo}
           />
         </div>
 
-        {/* Center - Kanban Board */}
+        {/* Center - Kanban Board (Tasks) */}
         <main className="flex-1 min-w-0 animate-slide-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
           <KanbanBoard
             tasks={tasks}
@@ -107,12 +102,6 @@ export default function Home() {
             onPromotedTodoHandled={handlePromotedTodoHandled}
           />
         </main>
-
-        {/* Right Sidebar */}
-        <aside className="w-full xl:w-[300px] flex flex-col gap-6 animate-slide-up" style={{ animationDelay: '0.3s', opacity: 0 }}>
-          <TodoList todos={todos} setTodos={setTodos} onPromote={handlePromoteTodo} />
-          <NoteArea notes={notes} setNotes={setNotes} />
-        </aside>
       </div>
       </div>
     </>

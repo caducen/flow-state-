@@ -1,6 +1,10 @@
 import { Task, EnergyLevel, PRIORITY_POINTS, ENERGY_POINTS, ENERGY_BALANCE, UserState } from '@/types'
 
 export type CapacityZone = 'under' | 'balanced' | 'over'
+export type EnergyZone = 'full' | 'good' | 'half' | 'low' | 'warning' | 'critical' | 'overloaded'
+
+// Maximum energy (Grounded state) - used as the "full tank"
+const MAX_ENERGY = 18
 export type WeightCategory = 'light' | 'medium' | 'heavy'
 
 /**
@@ -61,7 +65,7 @@ export function getWeightCategory(weight: number): WeightCategory {
 }
 
 /**
- * Get user-friendly message for capacity zone
+ * Get user-friendly message for capacity zone (legacy - based on capacity used)
  */
 export function getCapacityMessage(zone: CapacityZone): string {
   switch (zone) {
@@ -71,6 +75,78 @@ export function getCapacityMessage(zone: CapacityZone): string {
       return 'Good balance for today'
     case 'over':
       return "That's ambitious. Are you sure?"
+  }
+}
+
+/**
+ * Calculate remaining energy percentage (fuel gauge style)
+ * Based on remaining energy out of MAX_ENERGY (18)
+ */
+export function getRemainingPercentage(selectedWeight: number, energyBalance: number): number {
+  const remaining = Math.max(energyBalance - selectedWeight, 0)
+  return (remaining / MAX_ENERGY) * 100
+}
+
+/**
+ * Determine energy zone based on remaining percentage
+ * Matches the 6-color gradient system used in EnergyProgressBar and EnergyCursor
+ * 80-100%: Green (full)
+ * 60-80%: Cyan (good)
+ * 45-60%: Blue (half)
+ * 30-45%: Purple (low)
+ * 15-30%: Orange (warning)
+ * 0-15%: Red (critical)
+ * Over capacity: Red (overloaded)
+ */
+export function getEnergyZone(selectedWeight: number, energyBalance: number): EnergyZone {
+  if (selectedWeight > energyBalance) return 'overloaded'
+
+  const remainingPercent = getRemainingPercentage(selectedWeight, energyBalance)
+
+  if (remainingPercent > 80) return 'full'
+  if (remainingPercent > 60) return 'good'
+  if (remainingPercent > 45) return 'half'
+  if (remainingPercent > 30) return 'low'
+  if (remainingPercent > 15) return 'warning'
+  return 'critical'
+}
+
+/**
+ * Get user-friendly message for energy zone (fuel gauge style)
+ * Matches the 6-color gradient system
+ */
+export function getEnergyMessage(zone: EnergyZone): string {
+  switch (zone) {
+    case 'full':
+      return 'Full tank! Plenty of energy'
+    case 'good':
+      return 'Good reserves remaining'
+    case 'half':
+      return 'Half tank - pacing well'
+    case 'low':
+      return 'Getting low on capacity'
+    case 'warning':
+      return 'Running low - prioritize carefully'
+    case 'critical':
+      return 'Very low capacity remaining'
+    case 'overloaded':
+      return 'Overloaded - consider dropping tasks'
+  }
+}
+
+/**
+ * Get color for energy zone (hex values)
+ * Matches EnergyProgressBar and EnergyCursor colors
+ */
+export function getEnergyZoneColor(zone: EnergyZone): string {
+  switch (zone) {
+    case 'full': return '#10B981'      // Emerald/Green
+    case 'good': return '#06B6D4'      // Cyan
+    case 'half': return '#3B82F6'      // Blue
+    case 'low': return '#8B5CF6'       // Violet/Purple
+    case 'warning': return '#F97316'   // Orange
+    case 'critical': return '#F43F5E'  // Rose/Red
+    case 'overloaded': return '#F43F5E' // Rose/Red
   }
 }
 

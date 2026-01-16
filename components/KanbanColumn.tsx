@@ -57,12 +57,26 @@ export function KanbanColumn({ id, title, tasks, labels, onAddTask, onDeleteTask
   return (
     <div className="flex-1 min-w-[260px] max-w-[340px]">
       {/* Column Header */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-4 pr-3">
         <span className={`w-2 h-2 rounded-full ${COLUMN_ACCENTS[id]}`} />
         <h2 className="font-display text-base font-medium text-ink-rich">{title}</h2>
         <span className="text-xs text-ink-faint font-mono ml-auto">
           {tasks.length}
         </span>
+        {/* Add Task Button - Only for Planned Tasks column */}
+        {id === 'todo' && (
+          <button
+            onClick={() => onAddTask(id)}
+            className="px-2.5 py-1 text-xs text-ink-muted hover:text-amber-glow
+              bg-surface-raised hover:bg-surface-overlay
+              border border-subtle hover:border-amber-glow/30
+              rounded-lg transition-all duration-200
+              flex items-center gap-1"
+          >
+            <span className="text-sm">+</span>
+            <span>Add</span>
+          </button>
+        )}
       </div>
 
       {/* Drop Zone */}
@@ -105,21 +119,6 @@ export function KanbanColumn({ id, title, tasks, labels, onAddTask, onDeleteTask
         )}
       </div>
 
-      {/* Add Button - Only for Todo column */}
-      {id === 'todo' && (
-        <button
-          onClick={() => onAddTask(id)}
-          className="w-full mt-3 py-3 text-sm text-ink-muted hover:text-ink-rich
-            border border-dashed border-ink-faint/30 hover:border-amber-glow/50
-            rounded-xl transition-all duration-200
-            hover:bg-surface-base/30 hover:shadow-glow-sm
-            focus-visible:border-amber-glow/50 focus-visible:bg-surface-base/30 focus-visible:text-ink-rich
-            group"
-        >
-          <span className="group-hover:text-amber-glow group-focus-visible:text-amber-glow transition-colors">+</span>
-          {' '}Add task
-        </button>
-      )}
     </div>
   )
 }

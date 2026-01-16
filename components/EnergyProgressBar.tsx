@@ -1,8 +1,11 @@
 'use client'
 
+// Maximum energy (Grounded state) - used as the "full tank"
+const MAX_ENERGY = 18
+
 interface EnergyProgressBarProps {
-  used: number        // Points used (e.g., 9)
-  total: number       // Total points (e.g., 18)
+  used: number        // Points used by selected tasks (e.g., 9)
+  total: number       // Energy balance for current state (18/9/6)
   compact?: boolean   // Compact mode for smaller displays
   showLabel?: boolean // Show "Energy" label
 }
@@ -13,36 +16,59 @@ export function EnergyProgressBar({
   compact = false,
   showLabel = true
 }: EnergyProgressBarProps) {
-  const percentage = total > 0 ? (used / total) * 100 : 0
-  const isOverCapacity = percentage > 100
-  const cappedPercentage = Math.min(percentage, 100)
+  // Calculate REMAINING energy (fuel gauge style)
+  const remaining = Math.max(total - used, 0)
+  const percentage = (remaining / MAX_ENERGY) * 100
+  const isOverCapacity = used > total
+  const displayPercentage = Math.max(percentage, 0)
 
-  // Color logic based on capacity zones
+  // Color logic based on remaining energy (fuel gauge with gradient)
+  // 80-100% = Green (full tank)
+  // 60-80%  = Cyan (good)
+  // 45-60%  = Blue (half tank)
+  // 30-45%  = Purple (getting low)
+  // 15-30%  = Orange (low fuel warning)
+  // 0-15%   = Red (critical)
   const getBarColor = () => {
-    if (percentage > 100) return 'bg-rose-500'
-    if (percentage > 70) return 'bg-blue-500'
-    return 'bg-emerald-500'
+    if (isOverCapacity) return 'bg-rose-500'
+    if (percentage > 80) return 'bg-emerald-500'
+    if (percentage > 60) return 'bg-cyan-500'
+    if (percentage > 45) return 'bg-blue-500'
+    if (percentage > 30) return 'bg-violet-500'
+    if (percentage > 15) return 'bg-orange-500'
+    return 'bg-rose-500'
   }
 
   const getTextColor = () => {
-    if (percentage > 100) return 'text-rose-400'
-    if (percentage > 70) return 'text-blue-400'
-    return 'text-emerald-400'
+    if (isOverCapacity) return 'text-rose-400'
+    if (percentage > 80) return 'text-emerald-400'
+    if (percentage > 60) return 'text-cyan-400'
+    if (percentage > 45) return 'text-blue-400'
+    if (percentage > 30) return 'text-violet-400'
+    if (percentage > 15) return 'text-orange-400'
+    return 'text-rose-400'
   }
 
   if (compact) {
     return (
       <div className="flex items-center gap-2">
-        {/* Compact bar */}
-        <div className="w-16 h-1.5 bg-surface-overlay rounded-full overflow-hidden">
+        {/* Compact bar - fuel gauge style */}
+        <div className="w-20 h-2 bg-surface-overlay rounded-full overflow-hidden relative">
+          {/* Quarter markers */}
+          <div className="absolute inset-0 flex justify-between px-px">
+            <div className="w-px h-full bg-ink-faint/20" />
+            <div className="w-px h-full bg-ink-faint/20" />
+            <div className="w-px h-full bg-ink-faint/20" />
+          </div>
+          {/* Fill bar */}
           <div
-            className={`h-full rounded-full transition-all duration-300 ${getBarColor()}`}
-            style={{ width: `${cappedPercentage}%` }}
+            className={`h-full rounded-full transition-all duration-500 ${getBarColor()}`}
+            style={{ width: `${displayPercentage}%` }}
           />
         </div>
-        {/* Compact text */}
+        {/* Compact text - show remaining */}
         <span className={`text-xs font-mono ${getTextColor()}`}>
-          {used}/{total}
+          {remaining}/{MAX_ENERGY}
         </span>
       </div>
     )
@@ -57,23 +83,38 @@ export function EnergyProgressBar({
         )}
         <div className="flex items-center gap-1.5">
           <span className={`text-sm font-mono font-medium ${getTextColor()}`}>
-            {used}/{total}
+            {remaining}/{MAX_ENERGY}
           </span>
-          <span className="text-xs text-ink-faint">points</span>
+          <span className="text-xs text-ink-faint">remaining</span>
           {isOverCapacity && (
             <span className="text-xs text-rose-400 ml-1">
-              ({Math.round(percentage)}%)
+              (overloaded by {used - total})
             </span>
           )}
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="h-2 bg-surface-overlay rounded-full overflow-hidden">
+      {/* Progress bar - fuel gauge with markers */}
+      <div className="h-3 bg-surface-overlay rounded-full overflow-hidden relative">
+        {/* Quarter markers at 25%, 50%, 75% */}
+        <div className="absolute inset-y-0 left-1/4 w-px bg-ink-faint/30 z-10" />
+        <div className="absolute inset-y-0 left-1/2 w-px bg-ink-faint/30 z-10" />
+        <div className="absolute inset-y-0 left-3/4 w-px bg-ink-faint/30 z-10" />
+
+        {/* Fill bar */}
         <div
-          className={`h-full rounded-full transition-all duration-300 ${getBarColor()}`}
-          style={{ width: `${cappedPercentage}%` }}
+          className={`h-full rounded-full transition-all duration-500 ${getBarColor()}`}
+          style={{ width: `${displayPercentage}%` }}
         />
+      </div>
+
+      {/* Markers labels */}
+      <div className="flex justify-between text-[10px] text-ink-faint px-0.5">
+        <span>E</span>
+        <span>¼</span>
+        <span>½</span>
+        <span>¾</span>
+        <span>F</span>
       </div>
 
       {/* Over capacity warning */}
@@ -82,7 +123,7 @@ export function EnergyProgressBar({
           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
-          <span>Over capacity</span>
+          <span>Over capacity - you may be overcommitting</span>
         </div>
       )}
     </div>

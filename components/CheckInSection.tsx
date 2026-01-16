@@ -1,8 +1,7 @@
 'use client'
 
 import { Task, UserState, USER_STATE_CONFIG } from '@/types'
-import { getSelectedWeight, getEnergyBalance, getCapacityPercentage, getFlowMeterPercentage } from '@/utils/flowMeter'
-import { FlowMeter } from './FlowMeter'
+import { getSelectedWeight, getEnergyBalance, getEnergyZone, getEnergyZoneColor } from '@/utils/flowMeter'
 
 interface CheckInSectionProps {
   userState: UserState | null
@@ -14,9 +13,6 @@ export function CheckInSection({ userState, setUserState, tasks }: CheckInSectio
   const energyBalance = getEnergyBalance(userState)
   const selectedWeight = getSelectedWeight(tasks)
   const todayTaskCount = tasks.filter(t => t.isTodayTask).length
-  const capacityPercentage = getCapacityPercentage(selectedWeight, energyBalance)
-  // Flow meter percentage includes state's base position
-  const flowMeterPercentage = getFlowMeterPercentage(userState, capacityPercentage)
 
   return (
     <div className="mb-8">
@@ -82,24 +78,48 @@ export function CheckInSection({ userState, setUserState, tasks }: CheckInSectio
         })}
       </div>
 
-      {/* Energy Balance Display */}
+      {/* Energy Display */}
       {userState && (
         <div className="flex items-center gap-4 animate-fade-in">
-          <div className="flex items-center gap-3 px-4 py-3 bg-surface-raised rounded-xl">
-            {/* Energy Balance */}
-            <div className="flex items-center gap-2">
-              <span className="text-ink-muted text-sm">Energy Balance:</span>
+          <div className="flex items-center gap-3 px-4 py-3 bg-surface-raised rounded-xl flex-wrap">
+            {/* Starting Energy (state's balance) */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-ink-muted text-sm">Starting:</span>
               <span
-                className="font-mono font-semibold text-lg"
+                className="font-mono font-semibold"
                 style={{ color: USER_STATE_CONFIG[userState].color }}
               >
-                {selectedWeight}/{energyBalance}
+                {energyBalance}
               </span>
-              <span className="text-ink-faint text-sm">points</span>
             </div>
 
             {/* Divider */}
-            <div className="w-px h-6 bg-border-subtle" />
+            <div className="w-px h-5 bg-border-subtle" />
+
+            {/* Used Energy */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-ink-muted text-sm">Used:</span>
+              <span className="font-mono font-semibold text-ink-base">
+                {selectedWeight}
+              </span>
+            </div>
+
+            {/* Divider */}
+            <div className="w-px h-5 bg-border-subtle" />
+
+            {/* Remaining Energy - uses gradient color */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-ink-muted text-sm">Remaining:</span>
+              <span
+                className="font-mono font-semibold"
+                style={{ color: getEnergyZoneColor(getEnergyZone(selectedWeight, energyBalance)) }}
+              >
+                {Math.max(energyBalance - selectedWeight, 0)}
+              </span>
+            </div>
+
+            {/* Divider */}
+            <div className="w-px h-5 bg-border-subtle" />
 
             {/* Today's tasks count */}
             <div className="text-sm text-ink-muted">
@@ -117,12 +137,6 @@ export function CheckInSection({ userState, setUserState, tasks }: CheckInSectio
         </div>
       )}
 
-      {/* Flow Meter */}
-      {userState && (
-        <div className="mt-6 flex justify-center animate-fade-in">
-          <FlowMeter capacityPercentage={flowMeterPercentage} size={240} />
-        </div>
-      )}
     </div>
   )
 }

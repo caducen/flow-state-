@@ -15,7 +15,7 @@ import { Task, TaskStatus, Label, UserState, PRIORITY_CONFIG, ENERGY_CONFIG } fr
 import { KanbanColumn } from './KanbanColumn'
 import { AddTaskModal } from './AddTaskModal'
 import { OverCapacityDialog } from './OverCapacityDialog'
-import { getTaskWeight, getSelectedWeight, getEnergyBalance } from '@/utils/flowMeter'
+import { getTaskWeight, getSelectedWeight, getEnergyBalance, getEnergyZone, getEnergyMessage, getEnergyZoneColor } from '@/utils/flowMeter'
 import { EnergyProgressBar } from './EnergyProgressBar'
 
 interface KanbanBoardProps {
@@ -30,7 +30,7 @@ interface KanbanBoardProps {
 }
 
 const COLUMNS: { id: TaskStatus; title: string }[] = [
-  { id: 'todo', title: 'To Do' },
+  { id: 'todo', title: 'Planned Tasks' },
   { id: 'in-progress', title: 'In Progress' },
   { id: 'complete', title: 'Complete' },
 ]
@@ -333,12 +333,24 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels, userState, set
       {/* Today's 3 Bar */}
       {todaysTasks.length > 0 && (
         <div className="mb-4 p-3 bg-surface-base border-subtle rounded-xl">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <svg className="w-4 h-4 text-amber-glow" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
             </svg>
             <span className="text-xs font-medium text-ink-rich">Today's {todaysTasks.length}</span>
             <span className="text-xs text-ink-faint">/ 3</span>
+            {/* Energy message */}
+            {userState && (
+              <>
+                <span className="text-ink-faint">•</span>
+                <span
+                  className="text-xs font-medium"
+                  style={{ color: getEnergyZoneColor(getEnergyZone(selectedWeight, energyBalance)) }}
+                >
+                  {getEnergyMessage(getEnergyZone(selectedWeight, energyBalance))}
+                </span>
+              </>
+            )}
           </div>
           <div className="flex flex-wrap gap-2">
             {todaysTasks.map(task => (

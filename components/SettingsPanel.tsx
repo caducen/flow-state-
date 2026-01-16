@@ -85,15 +85,24 @@ export function SettingsPanel({ energyCursorEnabled = false, onEnergyCursorChang
 
           {/* Energy Cursor Toggle */}
           <div className="space-y-4">
-            <div
-              className="flex items-start gap-3 cursor-pointer group"
+            <button
+              type="button"
+              role="switch"
+              aria-checked={energyCursorEnabled}
+              className="flex items-start gap-3 cursor-pointer group w-full text-left"
+              style={{ position: 'relative', zIndex: 10001 }}
+              onMouseDown={(e) => {
+                // Stop mousedown to prevent the "click outside" handler from closing the panel
+                e.stopPropagation()
+              }}
               onClick={(e) => {
+                e.preventDefault()
                 e.stopPropagation()
                 onEnergyCursorChange?.(!energyCursorEnabled)
               }}
             >
               {/* Toggle Switch */}
-              <div className="relative flex-shrink-0 mt-0.5">
+              <div className="relative flex-shrink-0 mt-0.5 pointer-events-none">
                 <div className={`
                   w-9 h-5 rounded-full
                   transition-colors duration-200
@@ -109,7 +118,7 @@ export function SettingsPanel({ energyCursorEnabled = false, onEnergyCursorChang
               </div>
 
               {/* Label and description */}
-              <div className="flex-1">
+              <div className="flex-1 pointer-events-none">
                 <span className="text-sm font-medium text-ink-rich group-hover:text-amber-glow transition-colors">
                   Energy Cursor
                 </span>
@@ -117,7 +126,7 @@ export function SettingsPanel({ energyCursorEnabled = false, onEnergyCursorChang
                   Custom cursor that changes color based on your capacity usage
                 </p>
               </div>
-            </div>
+            </button>
 
             {/* Divider */}
             <div className="border-t border-subtle" />

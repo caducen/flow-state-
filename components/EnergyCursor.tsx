@@ -2,28 +2,43 @@
 
 import { useEffect, useState, useCallback } from 'react'
 
+// Maximum energy (Grounded state) - used as the "full tank"
+const MAX_ENERGY = 18
+
 interface EnergyCursorProps {
   enabled: boolean
   selectedWeight: number
   energyBalance: number
 }
 
-type CursorState = 'green' | 'blue' | 'red'
+type CursorState = 'green' | 'cyan' | 'blue' | 'purple' | 'orange' | 'red'
 
 export function EnergyCursor({ enabled, selectedWeight, energyBalance }: EnergyCursorProps) {
   const [position, setPosition] = useState({ x: -100, y: -100 })
   const [isVisible, setIsVisible] = useState(false)
   const [isTouchDevice, setIsTouchDevice] = useState(false)
 
-  // Calculate capacity percentage
-  const capacityPercent = energyBalance > 0 ? (selectedWeight / energyBalance) * 100 : 0
+  // Calculate REMAINING energy (fuel gauge style)
+  const remaining = Math.max(energyBalance - selectedWeight, 0)
+  const remainingPercent = (remaining / MAX_ENERGY) * 100
+  const isOverCapacity = selectedWeight > energyBalance
 
-  // Determine cursor state based on thresholds
+  // Determine cursor state based on remaining energy (fuel gauge with gradient)
+  // 80-100% = Green (full tank)
+  // 60-80%  = Cyan (good)
+  // 45-60%  = Blue (half tank)
+  // 30-45%  = Purple (getting low)
+  // 15-30%  = Orange (low fuel warning)
+  // 0-15%   = Red (critical)
   const getCursorState = useCallback((): CursorState => {
-    if (capacityPercent > 100) return 'red'
-    if (capacityPercent >= 70) return 'blue'
-    return 'green'
-  }, [capacityPercent])
+    if (isOverCapacity) return 'red'
+    if (remainingPercent > 80) return 'green'
+    if (remainingPercent > 60) return 'cyan'
+    if (remainingPercent > 45) return 'blue'
+    if (remainingPercent > 30) return 'purple'
+    if (remainingPercent > 15) return 'orange'
+    return 'red'
+  }, [remainingPercent, isOverCapacity])
 
   const cursorState = getCursorState()
 
@@ -86,7 +101,10 @@ export function EnergyCursor({ enabled, selectedWeight, energyBalance }: EnergyC
   const getGlowColor = () => {
     switch (cursorState) {
       case 'green': return 'rgba(16, 185, 129, 0.5)'
+      case 'cyan': return 'rgba(6, 182, 212, 0.5)'
       case 'blue': return 'rgba(59, 130, 246, 0.5)'
+      case 'purple': return 'rgba(139, 92, 246, 0.5)'
+      case 'orange': return 'rgba(249, 115, 22, 0.5)'
       case 'red': return 'rgba(244, 63, 94, 0.5)'
     }
   }
