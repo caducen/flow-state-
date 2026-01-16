@@ -104,6 +104,24 @@ When user opens the app, they check in with "How are you feeling?"
 | 11 | Red | `frame-11-red.png` |
 | 12 | Red Final | `frame-12-red-final.png` |
 
+### Video Scrubbing
+
+The Flow Meter uses a 6.04-second video that scrubs to different timestamps based on user state and task load.
+
+**Video Duration:** 6.04 seconds
+
+**Starting Position by User State (0 tasks selected):**
+
+| User State | Base % | Video Time | Arrow Position |
+|------------|--------|------------|----------------|
+| **Grounded** | 0% | 0.00s | Green (start) |
+| **Scattered** | 50% | 3.02s | Blue (middle) |
+| **Tired** | 85% | 5.13s | Red-orange (near end) |
+
+**Formula:** `(capacityPercentage / 100) × 6.04s`
+
+As users add tasks, the percentage increases from these starting points, scrubbing further into the video toward red/depleted. The video maxes out at 6.04s when capacity reaches 100%.
+
 ---
 
 ## TASK WEIGHT CALCULATION
@@ -244,6 +262,7 @@ User checks in as Tired
 |---------|------|---------|
 | 1.0 | 2026-01-13 | Initial specification |
 | 1.1 | 2026-01-13 | Updated post-implementation: marked phases complete, added roadmap, documented decisions |
+| 1.1.1 | 2026-01-16 | Updated energy balance values (18/9/6), added video scrubbing timestamps |
 
 ---
 
