@@ -8,13 +8,24 @@ const MAX_ENERGY = 18
 export type WeightCategory = 'light' | 'medium' | 'heavy'
 
 /**
- * Calculate task weight from priority + energy
+ * Calculate base task weight from priority + energy
  * Range: 2 (low+low) to 6 (high+high)
  */
-export function getTaskWeight(task: Task): number {
+export function getBaseTaskWeight(task: Task): number {
   const priorityPoints = PRIORITY_POINTS[task.priority]
   const energyPoints = ENERGY_POINTS[task.energyLevel ?? 'medium']
   return priorityPoints + energyPoints
+}
+
+/**
+ * Calculate effective task weight accounting for progress
+ * A task that's 75% done only costs 25% of its original weight
+ */
+export function getTaskWeight(task: Task): number {
+  const baseWeight = getBaseTaskWeight(task)
+  const progress = task.progress ?? 0
+  const remainingWork = (100 - progress) / 100
+  return Math.round(baseWeight * remainingWork * 10) / 10  // Round to 1 decimal
 }
 
 /**

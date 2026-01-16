@@ -1,17 +1,35 @@
-# FLOW STATE - FLOW METER SYSTEM
-## Feature Specification v1.0
+# FLOW STATE - ENERGY SYSTEM SPECIFICATION
+## Version 1.2
 
-**Date:** 2026-01-13  
-**Status:** Ready for Implementation  
-**Priority:** Core Feature  
+**Date:** 2026-01-16
+**Status:** Implemented
+**Previous Versions:** v1.0 (Initial spec), v1.1 (All phases complete)
 
 ---
 
 ## OVERVIEW
 
-Replace the hard "Today's 3" limit with a dynamic **Flow Meter** system that adapts to the user's current state and provides real-time visual feedback through an animated arrow indicator.
+Flow State is a task management app with a dynamic energy system that adapts to the user's current state. The system helps users make realistic commitments by tracking energy costs against their available capacity.
 
-**Core Principle:** Not all tasks are equal. A tired person selecting three heavy tasks is overloaded. A grounded person selecting three light tasks is underutilized.
+**Core Principle:** Not all tasks are equal. A tired person selecting heavy tasks is overloaded. A grounded person selecting only light tasks is underutilized. The energy system provides visual feedback to help users find balance.
+
+---
+
+## WHAT CHANGED IN v1.2
+
+### Major Changes
+1. **Single-column mobile-first layout** - Replaced 3-column Kanban board with a clean, focused task list
+2. **Progress tracking** - Tasks now track progress (0%, 25%, 50%, 75%, 100%) with color-coded bars
+3. **Dynamic energy cost** - Task energy cost decreases as progress increases (75% done = 25% cost)
+4. **Archive system** - Completed tasks move to a collapsible archive section
+5. **QuickTodos** - Lightweight reminders separate from structured tasks
+6. **Delete confirmation** - Tasks require confirmation before deletion
+
+### Removed
+- FlowMeter video/arrow animation (replaced by EnergyProgressBar)
+- 3-column Kanban (To Do / In Progress / Done)
+- TodoList and NoteArea components
+- OverCapacityDialog (replaced by softer guidance)
 
 ---
 
@@ -21,8 +39,11 @@ Replace the hard "Today's 3" limit with a dynamic **Flow Meter** system that ada
 |------|------------|
 | **Flow State** | The app name |
 | **Energy Balance** | Points available based on check-in state (18/9/6) |
-| **Flow Meter** | The animated arrow indicator showing capacity usage |
 | **Task Weight** | Points a task "costs" based on priority + energy required |
+| **Progress** | How much of a task is complete (0-100%) |
+| **Effective Weight** | Task weight adjusted for progress |
+| **QuickTodo** | Lightweight reminder (no energy cost) |
+| **Task** | Structured work item with energy cost |
 
 ---
 
@@ -30,43 +51,32 @@ Replace the hard "Today's 3" limit with a dynamic **Flow Meter** system that ada
 
 When user opens the app, they check in with "How are you feeling?"
 
-| Check-in State | Energy Balance | Starting Arrow | Description |
-|----------------|----------------|----------------|-------------|
-| **Grounded** | 18 points | ↗ GREEN (up-right) | Full energy, clear mind, ready for challenges |
-| **Scattered** | 9 points | → BLUE (right) | Some energy, needs focus, moderate capacity |
-| **Tired** | 6 points | ↘ RED (down-right) | Limited energy, needs rest, light tasks only |
+| Check-in State | Energy Balance | Description |
+|----------------|----------------|-------------|
+| **Grounded** | 18 points | Full energy, clear mind, ready for challenges |
+| **Scattered** | 9 points | Some energy, needs focus, moderate capacity |
+| **Tired** | 6 points | Limited energy, needs rest, light tasks only |
 
 ---
 
-## THE FLOW METER (Arrow Indicator)
+## ENERGY PROGRESS BAR
 
-### Visual States
+The main visual indicator showing energy usage. Uses a 6-color gradient system:
 
-| Arrow Direction | Color | Meaning |
-|-----------------|-------|---------|
-| ↗ Up-right (45°) | Green | Under capacity - room for more |
-| → Right (0°) | Blue | At capacity - well balanced |
-| ↘ Down-right (-45°) | Red/Orange | Over capacity - too much |
+| Remaining % | Color | Zone | Message |
+|-------------|-------|------|---------|
+| 80-100% | Green (#10B981) | Full | "Full tank! Plenty of energy" |
+| 60-80% | Cyan (#06B6D4) | Good | "Good reserves remaining" |
+| 45-60% | Blue (#3B82F6) | Half | "Half tank - pacing well" |
+| 30-45% | Purple (#8B5CF6) | Low | "Getting low on capacity" |
+| 15-30% | Orange (#F97316) | Warning | "Running low - prioritize carefully" |
+| 0-15% | Red (#F43F5E) | Critical | "Very low capacity remaining" |
+| Over capacity | Red (#F43F5E) | Overloaded | "Overloaded - consider dropping tasks" |
 
-### Animation Behavior
-
-- Arrow animates smoothly in REAL-TIME as user selects/deselects tasks
-- Color transitions through spectrum: Green → Cyan → Blue → Purple → Red
-- Rotation transitions smoothly between directions
-- Reference: 5-second video animation showing full transition
-
-### Animation Keyframes
-
-| Frame | Color | Direction | Capacity State |
-|-------|-------|-----------|----------------|
-| 0% | Lime Green | ↗ Up-right | Very under capacity |
-| 15% | Forest Green | ↗ Up-right | Under capacity |
-| 30% | Cyan | ↗ Slight right | Approaching balance |
-| 45% | Royal Blue | → Right | Balanced |
-| 60% | Indigo/Purple | ↘ Slight down | Slightly over |
-| 75% | Magenta | ↘ Down-right | Over capacity |
-| 90% | Orange | ↘ Down-right | Very over capacity |
-| 100% | Red | ↘ Down-right | Critical overload |
+### Display Format
+- **Starting**: User's energy balance (18, 9, or 6)
+- **Used**: Sum of effective task weights
+- **Remaining**: Starting - Used (color-coded)
 
 ---
 
@@ -79,251 +89,269 @@ When user opens the app, they check in with "How are you feeling?"
 | Priority | 3 pts | 2 pts | 1 pt |
 | Energy Required | 3 pts | 2 pts | 1 pt |
 
-### Task Weight Formula
+### Base Weight Formula
 
 ```
-Task Weight = Priority Points + Energy Points
+Base Weight = Priority Points + Energy Points
+Range: 2 (low+low) to 6 (high+high)
 ```
 
 ### Weight Categories
 
-| Combination | Weight | Category |
-|-------------|--------|----------|
-| High + High | 6 pts | Heavy |
-| High + Medium | 5 pts | Heavy |
-| Medium + High | 5 pts | Heavy |
-| Medium + Medium | 4 pts | Medium |
-| High + Low | 4 pts | Medium |
-| Low + High | 4 pts | Medium |
-| Medium + Low | 3 pts | Light |
-| Low + Medium | 3 pts | Light |
-| Low + Low | 2 pts | Light |
+| Weight | Category | Color | Description |
+|--------|----------|-------|-------------|
+| 2-3 pts | Light | Green (#7CB342) | Quick win - low energy |
+| 4 pts | Medium | Blue (#2196F3) | Moderate energy needed |
+| 5-6 pts | Heavy | Orange (#F4511E) | Requires a grounded state |
 
 ---
 
-## CAPACITY ZONES
+## PROGRESS TRACKING (New in v1.2)
 
-| Zone | Calculation | Arrow State | User Message |
-|------|-------------|-------------|--------------|
-| Under | Weight < 70% of Energy Balance | ↗ GREEN | "You have room for more" |
-| Balanced | Weight = 70-100% of Energy Balance | → BLUE | "Good balance for today" |
-| Over | Weight > 100% of Energy Balance | ↘ RED | "That's ambitious. Are you sure?" |
+### Progress Levels
 
----
+| Progress | Color | Label |
+|----------|-------|-------|
+| 0% | Red (#F43F5E) | Not Started |
+| 25% | Orange (#F97316) | 25% |
+| 50% | Blue (#3B82F6) | 50% |
+| 75% | Cyan (#06B6D4) | 75% |
+| 100% | Green (#10B981) | Complete |
 
-## USER INTERFACE REQUIREMENTS
-
-### 1. Check-in Screen
-
-- Question: "How are you feeling?"
-- Options: Grounded / Scattered / Tired
-- On selection:
-  - Set Energy Balance (18/9/6)
-  - Set initial Flow Meter arrow position and color
-  - Show: "Energy Balance: 18 points" (or 9 or 6)
-
-### 2. Task Creation/Edit Modal
-
-When user sets Priority and Energy Required:
-- Show immediate feedback on task "heaviness"
-- Visual indicator showing task weight
-- Examples:
-  - Heavy task (6 pts): "This task requires a grounded state"
-  - Medium task (4 pts): "Moderate energy needed"
-  - Light task (2 pts): "Quick win - low energy"
-
-### 3. Dashboard Flow Meter
-
-- Large, prominent arrow on main dashboard
-- Shows current capacity usage
-- Animates in real-time as tasks are selected/deselected
-- Display: Arrow + numeric balance (e.g., "8/14 points used")
-
-### 4. Task Selection Feedback
-
-When user selects a task for "Today":
-- Flow Meter animates to new position
-- Points update (e.g., "8/14 → 12/14")
-- If moving into RED zone: show confirmation
-
-### 5. Confirmation Dialog (When Over Capacity)
+### Effective Weight Formula
 
 ```
-"You're selecting more than your current Energy Balance.
-
-Current State: Scattered
-Energy Balance: 9 points available
-Selected Tasks: 12 points
-
-This might be ambitious for today. Would you like to:
-
-[ ] Continue anyway - I'm feeling good
-[ ] Review my selections
-[ ] Change my state to Grounded (+9 points)
+Effective Weight = Base Weight × (1 - Progress/100)
 ```
 
----
+**Examples:**
+- 6pt task at 0% = 6 pts cost
+- 6pt task at 25% = 4.5 pts cost
+- 6pt task at 50% = 3 pts cost
+- 6pt task at 75% = 1.5 pts cost
+- 6pt task at 100% = 0 pts cost (archived)
 
-## "TODAY'S 3" EVOLUTION
-
-### Old System
-- Hard limit: Maximum 3 tasks
-- No weight consideration
-- Same for all users
-
-### New System
-- Soft guidance based on Energy Balance
-- "Today's 3" = guidance for HEAVY tasks (6 pts each × 3 = 18 pts)
-- Light tasks: Could select 4-7 if capacity allows
-- User decides, system advises via Flow Meter
-
-### Examples
-
-**Grounded User (18 pts Energy Balance):**
-- 3 heavy tasks (18 pts) = Perfect → BLUE
-- 2 heavy + 2 medium (18 pts) = Perfect → BLUE
-- 9 light tasks (18 pts) = Perfect → BLUE
-
-**Scattered User (9 pts Energy Balance):**
-- 2 heavy tasks (12 pts) = Over capacity → RED → Warning
-- 1 heavy + 1 medium (10 pts) = Slightly over → Warning
-- 3 light + 1 medium (9 pts) = Perfect → BLUE
-
-**Tired User (6 pts Energy Balance):**
-- 1 heavy task (6 pts) = Perfect → BLUE
-- 1 medium + 1 light (5 pts) = Under capacity → GREEN
-- 3 light tasks (6 pts) = Perfect → BLUE
+This encourages progress on existing tasks rather than just adding new ones.
 
 ---
 
-## IMPLEMENTATION PHASES
+## APPLICATION ARCHITECTURE
 
-### Phase 1: Data Model Updates
-- [ ] Add `weight` field to Task type (calculated from priority + energy)
-- [ ] Add `energyBalance` field to user/session state
-- [ ] Add `selectedWeight` calculation (sum of today's task weights)
-- [ ] Add `userState` field (grounded/scattered/tired)
+### Active Components
 
-### Phase 2: Check-in Component
-- [ ] Create check-in screen/modal
-- [ ] Three state options with descriptions
-- [ ] Set Energy Balance on selection
-- [ ] Store in local state/storage
+```
+components/
+├── TaskList.tsx          # Main task list with progress tracking
+├── AddTaskModal.tsx      # Create/edit tasks
+├── QuickTodos.tsx        # Lightweight reminders
+├── CheckInSection.tsx    # User state check-in
+├── EnergyProgressBar.tsx # Visual energy indicator
+├── EnergyCursor.tsx      # Optional cursor effect
+├── SettingsPanel.tsx     # App settings
+└── ThemeToggle.tsx       # Dark/light theme switch
+```
 
-### Phase 3: Flow Meter Component
-- [ ] Create animated arrow component
-- [ ] Support color transitions (green → blue → red spectrum)
-- [ ] Support rotation transitions (up-right → right → down-right)
-- [ ] Accept capacity percentage as input
-- [ ] Smooth CSS/animation transitions
+### Data Types
 
-### Phase 4: Task Weight Feedback
-- [ ] Add weight indicator to task creation modal
-- [ ] Show "heaviness" category (Light/Medium/Heavy)
-- [ ] Color-code based on weight
-- [ ] Show point value
+```typescript
+interface Task {
+  id: string
+  title: string
+  description?: string
+  status: 'active' | 'archived'
+  progress: number          // 0, 25, 50, 75, 100
+  priority: Priority        // 'low' | 'medium' | 'high'
+  energyLevel?: EnergyLevel // 'low' | 'medium' | 'high'
+  dueDate?: string
+  labelIds: string[]
+  subtasks?: Subtask[]
+  createdAt: number
+  completedAt?: number      // When archived
+  isTodayTask?: boolean     // Star indicator
+}
 
-### Phase 5: Dashboard Integration
-- [ ] Add Flow Meter to main dashboard
-- [ ] Display Energy Balance (e.g., "8/14 points")
-- [ ] Connect to selected tasks weight
-- [ ] Real-time animation on selection changes
+type UserState = 'grounded' | 'scattered' | 'tired'
 
-### Phase 6: Confirmation Flow
-- [ ] Add confirmation dialog for over-capacity selections
-- [ ] Soft warning (not blocking)
-- [ ] Options: continue, review, or change state
+interface QuickTodo {
+  id: string
+  text: string
+  completed: boolean
+  createdAt: number
+}
+```
+
+### Local Storage Keys
+
+| Key | Description |
+|-----|-------------|
+| `flow-tasks-v3` | Task array |
+| `flow-quick-todos` | QuickTodo array |
+| `flow-labels` | Custom labels |
+| `flow-user-state` | Current check-in state |
+| `energyCursorEnabled` | Cursor feature toggle |
 
 ---
 
-## COLOR PALETTE
+## USER INTERFACE
 
-```css
-/* GREEN - Under Capacity */
---green-main: #7CB342;
---green-light: #9CCC65;
---green-dark: #558B2F;
+### Layout (Mobile-First)
 
-/* CYAN - Transition */
---cyan-main: #00BCD4;
---cyan-light: #4DD0E1;
---cyan-dark: #0097A7;
+```
+┌─────────────────────────────┐
+│  Flow State        [☀️] [⚙️] │  Header
+├─────────────────────────────┤
+│  How are you feeling?       │  Check-in
+│  [Grounded] [Scattered] ... │
+├─────────────────────────────┤
+│  ████████░░░░ 12/18 pts     │  Energy Bar
+│  Today's 2 / 3              │
+├─────────────────────────────┤
+│  Quick Todos (3 pending)    │  QuickTodos
+│  ○ Buy groceries      [↑]   │
+│  ○ Call mom           [↑]   │
+├─────────────────────────────┤
+│  Tasks (5)          [+ Add] │  TaskList
+│  ┌─────────────────────┐    │
+│  │ ★ Design homepage   │    │  Task Card
+│  │ █████████░░ 75%     │    │  Progress bar
+│  │ #design   1.5/6 pts │    │
+│  └─────────────────────┘    │
+│  ┌─────────────────────┐    │
+│  │ ○ API integration   │    │
+│  │ ████░░░░░░ 50%      │    │
+│  │           3/6 pts   │    │
+│  └─────────────────────┘    │
+├─────────────────────────────┤
+│  ▸ Completed (8)            │  Archive
+└─────────────────────────────┘
+```
 
-/* BLUE - Balanced */
---blue-main: #2196F3;
---blue-light: #64B5F6;
---blue-dark: #1565C0;
+### Task Card (Expanded)
 
-/* PURPLE - Transition */
---purple-main: #9C27B0;
---purple-light: #BA68C8;
---purple-dark: #7B1FA2;
+```
+┌─────────────────────────────┐
+│ ★ Design homepage           │
+│ ████████████ 75%            │
+│                             │
+│ Description text here...    │
+│                             │
+│ [High] [⚡ High] 📅 Jan 20  │
+│                             │
+│ Subtasks (2/3)              │
+│ ✓ Wireframe                 │
+│ ✓ Colors                    │
+│ ○ Final review              │
+│                             │
+│ Progress                    │
+│ [0%][25%][50%][75%][100%]   │
+│                             │
+│ [Edit] [✓ Complete] [✕]     │
+└─────────────────────────────┘
+```
 
-/* RED/ORANGE - Over Capacity */
---red-main: #F4511E;
---red-light: #FF7043;
---red-dark: #BF360C;
+### Delete Confirmation
+
+When user clicks the delete button (✕):
+
+```
+┌─────────────────────────────┐
+│         ⚠️                  │
+│                             │
+│     Delete Task?            │
+│                             │
+│  This will delete           │
+│  "Design homepage".         │
+│  Are you sure?              │
+│                             │
+│   [Cancel]    [Delete]      │
+└─────────────────────────────┘
 ```
 
 ---
 
-## VISUAL ASSETS
+## QUICK TODOS vs TASKS
 
-### Arrow Animation Source
-- Oscar's 5-second MP4 video
-- 12 keyframe screenshots captured
-- Implementation options:
-  - CSS keyframe animation
-  - Lottie animation
-  - Video element with seek control
+| Feature | Quick Todos | Tasks |
+|---------|-------------|-------|
+| Energy cost | None | 2-6 points |
+| Progress tracking | No (done/not done) | Yes (0-100%) |
+| Priority/Energy | No | Yes |
+| Subtasks | No | Yes |
+| Labels | No | Yes |
+| Due dates | No | Yes |
+| Archive | No | Yes |
+| Use case | Quick reminders | Structured work |
 
-### Asset Files Needed
-```
-public/
-├── flow-meter/
-│   ├── arrow-green.png      # Keyframe: 0%
-│   ├── arrow-cyan.png       # Keyframe: 30%
-│   ├── arrow-blue.png       # Keyframe: 45%
-│   ├── arrow-purple.png     # Keyframe: 60%
-│   ├── arrow-orange.png     # Keyframe: 80%
-│   ├── arrow-red.png        # Keyframe: 100%
-│   └── flow-meter.mp4       # Full animation (optional)
-```
+**Promote**: QuickTodos can be promoted to Tasks (↑ button)
 
 ---
 
-## FUTURE ENHANCEMENTS
+## OPTIONAL FEATURES
 
-### Practices Integration (from Overwhelm Navigator)
-- When Tired, suggest practices to become Scattered
-- When Scattered, suggest practices to become Grounded
-- Pull from Overwhelm Navigator practice library
+### Energy Cursor
+When enabled in Settings:
+- Custom cursor that changes based on energy state
+- Visual feedback showing remaining capacity
+- Matches the 6-color gradient system
 
-### Smart Suggestions
-- AI suggests optimal task selection based on state
-- "Based on your energy, I'd recommend these tasks"
-
-### Historical Learning
-- Track planned vs actual completion
-- Adjust capacity estimates based on history
+### Theme Toggle
+- Light and dark mode support
+- Persists in local storage
 
 ---
 
-## CHECKLIST
+## IMPLEMENTATION STATUS
 
-- [ ] Update Task type with weight calculation
-- [ ] Add user state and Energy Balance to app state
-- [ ] Create check-in component
-- [ ] Create Flow Meter arrow component
-- [ ] Add weight feedback to task modal
-- [ ] Add Flow Meter to dashboard
-- [ ] Connect Flow Meter to task selection
-- [ ] Implement real-time animation
-- [ ] Add over-capacity confirmation dialog
-- [ ] Test all states (Grounded/Scattered/Tired)
-- [ ] Test edge cases (0 tasks, many tasks)
-- [ ] Extract arrow keyframes from video
+### Completed
+- [x] User state check-in (Grounded/Scattered/Tired)
+- [x] Energy balance calculation
+- [x] Task weight calculation
+- [x] Progress tracking (0-100%)
+- [x] Effective weight based on progress
+- [x] EnergyProgressBar with 6-color gradient
+- [x] Single-column TaskList
+- [x] Archive system for completed tasks
+- [x] QuickTodos component
+- [x] Promote todo to task
+- [x] Delete confirmation dialog
+- [x] Theme toggle (dark/light)
+- [x] Optional energy cursor
+- [x] Mobile-first responsive layout
+
+### Future Enhancements
+- [ ] Practice suggestions based on state
+- [ ] AI task recommendations
+- [ ] Historical capacity learning
+- [ ] Drag-and-drop reordering
+- [ ] Keyboard shortcuts
+- [ ] Data export/import
 
 ---
 
-**END OF FLOW METER SPECIFICATION v1.0**
+## CHANGELOG
+
+### v1.2 (2026-01-16)
+- Replaced Kanban board with single-column TaskList
+- Added progress tracking (0%, 25%, 50%, 75%, 100%)
+- Energy cost now decreases with task progress
+- Added archive section for completed tasks
+- Added delete confirmation dialog
+- Merged QuickTasks + TodoList into QuickTodos
+- Removed FlowMeter video animation
+- Removed OverCapacityDialog
+- Cleaned up unused components
+
+### v1.1 (2026-01-14)
+- All implementation phases complete
+- Added EnergyProgressBar
+- Added EnergyCursor
+- Updated energy values (18/9/6)
+
+### v1.0 (2026-01-13)
+- Initial specification
+- Flow Meter concept with arrow animation
+- Energy balance system design
+
+---
+
+**END OF SPECIFICATION v1.2**

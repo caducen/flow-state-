@@ -60,7 +60,7 @@ export function QuickTodos({ todos, setTodos, onPromote }: QuickTodosProps) {
         <h2 className="font-display text-base font-medium text-ink-rich">Quick Todos</h2>
 
         {/* Info icon with tooltip */}
-        <div className="relative">
+        <div className="relative" style={{ zIndex: showTooltip ? 99999 : 'auto' }}>
           <button
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
@@ -74,7 +74,14 @@ export function QuickTodos({ todos, setTodos, onPromote }: QuickTodosProps) {
             </svg>
           </button>
           {showTooltip && (
-            <div className="absolute left-0 top-full mt-2 w-72 p-3 bg-surface-overlay border border-white/10 rounded-xl shadow-2xl z-[9999]">
+            <div
+              className="fixed w-72 p-3 bg-surface-overlay border border-white/10 rounded-xl shadow-2xl"
+              style={{
+                zIndex: 99999,
+                top: '120px',
+                left: '20px'
+              }}
+            >
               <p className="text-xs text-ink-rich font-medium mb-2">Todo vs Task</p>
               <p className="text-xs text-ink-muted leading-relaxed mb-2">
                 <span className="text-cyan-400 font-medium">Todo</span> = A lightweight reminder. Quick captures, short-term items, simple checklist entries like "Buy milk" or "Call Alex".

@@ -76,6 +76,8 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
         dueDate: dueDate || undefined,
         labelIds: selectedLabels,
         subtasks: subtasks.length > 0 ? subtasks : undefined,
+        progress: task?.progress ?? 0,
+        isTodayTask: task?.isTodayTask ?? false,
       })
     }
   }

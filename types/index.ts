@@ -31,13 +31,15 @@ export interface Task {
   id: string
   title: string
   description?: string
-  status: 'todo' | 'in-progress' | 'complete'
+  status: 'active' | 'archived'  // Simplified: active or archived
+  progress: number  // 0, 25, 50, 75, 100
   priority: Priority
   energyLevel?: EnergyLevel // Energy required: High / Medium / Low
   dueDate?: string // ISO date string
   labelIds: string[]
   subtasks?: Subtask[]
   createdAt: number
+  completedAt?: number  // When task was archived
   isTodayTask?: boolean // Part of "Today's 3"
 }
 
@@ -48,6 +50,15 @@ export interface TodoItem {
 }
 
 export type TaskStatus = Task['status']
+
+// Progress color configuration (matches energy bar gradient)
+export const PROGRESS_CONFIG: Record<number, { label: string; color: string; bgColor: string }> = {
+  0: { label: 'Not Started', color: '#F43F5E', bgColor: 'rgba(244, 63, 94, 0.15)' },    // Red
+  25: { label: '25%', color: '#F97316', bgColor: 'rgba(249, 115, 22, 0.15)' },          // Orange
+  50: { label: '50%', color: '#3B82F6', bgColor: 'rgba(59, 130, 246, 0.15)' },          // Blue
+  75: { label: '75%', color: '#06B6D4', bgColor: 'rgba(6, 182, 212, 0.15)' },           // Cyan
+  100: { label: 'Complete', color: '#10B981', bgColor: 'rgba(16, 185, 129, 0.15)' },    // Green
+}
 
 export interface Note {
   id: string
