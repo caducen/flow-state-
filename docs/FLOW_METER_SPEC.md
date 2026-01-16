@@ -20,7 +20,7 @@ Replace the hard "Today's 3" limit with a dynamic **Flow Meter** system that ada
 | Term | Definition |
 |------|------------|
 | **Flow State** | The app name |
-| **Energy Balance** | Points available based on check-in state (14/9/5) |
+| **Energy Balance** | Points available based on check-in state (18/9/6) |
 | **Flow Meter** | The animated arrow indicator showing capacity usage |
 | **Task Weight** | Points a task "costs" based on priority + energy required |
 
@@ -32,9 +32,9 @@ When user opens the app, they check in with "How are you feeling?"
 
 | Check-in State | Energy Balance | Starting Arrow | Description |
 |----------------|----------------|----------------|-------------|
-| **Grounded** | 14 points | ↗ GREEN (up-right) | Full energy, clear mind, ready for challenges |
+| **Grounded** | 18 points | ↗ GREEN (up-right) | Full energy, clear mind, ready for challenges |
 | **Scattered** | 9 points | → BLUE (right) | Some energy, needs focus, moderate capacity |
-| **Tired** | 5 points | ↘ RED (down-right) | Limited energy, needs rest, light tasks only |
+| **Tired** | 6 points | ↘ RED (down-right) | Limited energy, needs rest, light tasks only |
 
 ---
 
@@ -118,9 +118,9 @@ Task Weight = Priority Points + Energy Points
 - Question: "How are you feeling?"
 - Options: Grounded / Scattered / Tired
 - On selection:
-  - Set Energy Balance (14/9/5)
+  - Set Energy Balance (18/9/6)
   - Set initial Flow Meter arrow position and color
-  - Show: "Energy Balance: 14 points" (or 9 or 5)
+  - Show: "Energy Balance: 18 points" (or 9 or 6)
 
 ### 2. Task Creation/Edit Modal
 
@@ -159,7 +159,7 @@ This might be ambitious for today. Would you like to:
 
 [ ] Continue anyway - I'm feeling good
 [ ] Review my selections
-[ ] Change my state to Grounded (+5 points)
+[ ] Change my state to Grounded (+9 points)
 ```
 
 ---
@@ -179,20 +179,20 @@ This might be ambitious for today. Would you like to:
 
 ### Examples
 
-**Grounded User (14 pts Energy Balance):**
-- 3 heavy tasks (18 pts) = Over capacity → RED → Warning
-- 2 heavy + 1 light (14 pts) = Perfect → BLUE
-- 7 light tasks (14 pts) = Perfect → BLUE
+**Grounded User (18 pts Energy Balance):**
+- 3 heavy tasks (18 pts) = Perfect → BLUE
+- 2 heavy + 2 medium (18 pts) = Perfect → BLUE
+- 9 light tasks (18 pts) = Perfect → BLUE
 
 **Scattered User (9 pts Energy Balance):**
 - 2 heavy tasks (12 pts) = Over capacity → RED → Warning
 - 1 heavy + 1 medium (10 pts) = Slightly over → Warning
 - 3 light + 1 medium (9 pts) = Perfect → BLUE
 
-**Tired User (5 pts Energy Balance):**
-- 1 heavy task (6 pts) = Over capacity → RED → Warning
-- 1 medium + 1 light (5 pts) = Perfect → BLUE
-- 2 light tasks (4 pts) = Under capacity → GREEN
+**Tired User (6 pts Energy Balance):**
+- 1 heavy task (6 pts) = Perfect → BLUE
+- 1 medium + 1 light (5 pts) = Under capacity → GREEN
+- 3 light tasks (6 pts) = Perfect → BLUE
 
 ---
 

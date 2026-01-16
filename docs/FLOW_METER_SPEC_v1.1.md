@@ -21,7 +21,7 @@ A dynamic **Flow Meter** system that replaces traditional hard task limits with 
 | Term | Definition |
 |------|------------|
 | **Flow State** | The app name |
-| **Energy Balance** | Points available based on check-in state (14/9/5) |
+| **Energy Balance** | Points available based on check-in state (18/9/6) |
 | **Flow Meter** | The animated arrow indicator showing capacity usage |
 | **Task Weight** | Points a task "costs" based on priority + energy required |
 
@@ -64,9 +64,9 @@ When user opens the app, they check in with "How are you feeling?"
 
 | Check-in State | Energy Balance | Starting Arrow | Description |
 |----------------|----------------|----------------|-------------|
-| **Grounded** | 14 points | ↗ GREEN (up-right) | Full energy, clear mind, ready for challenges |
+| **Grounded** | 18 points | ↗ GREEN (up-right) | Full energy, clear mind, ready for challenges |
 | **Scattered** | 9 points | → BLUE (right) | Some energy, needs focus, moderate capacity |
-| **Tired** | 5 points | ↘ RED (down-right) | Limited energy, needs rest, light tasks only |
+| **Tired** | 6 points | ↘ RED (down-right) | Limited energy, needs rest, light tasks only |
 
 ---
 
@@ -219,10 +219,10 @@ Next.js 14.2.35
 ### Near-term: Task Suggestions
 
 ```
-When user is Tired (5 pts):
+When user is Tired (6 pts):
 → AI suggests: "Here are 3 light tasks (2 pts each) that fit your energy"
 
-When user is Grounded (14 pts):
+When user is Grounded (18 pts):
 → AI suggests: "You have capacity for a heavy task. Want to tackle [X]?"
 ```
 
@@ -232,7 +232,7 @@ When user is Grounded (14 pts):
 User checks in as Tired
 → Flow State suggests: "Would you like a 5-minute grounding practice?"
 → User completes practice
-→ State upgrades to Scattered (+4 pts)
+→ State upgrades to Scattered (+3 pts)
 → Flow Meter adjusts
 ```
 

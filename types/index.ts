@@ -85,9 +85,9 @@ export const ENERGY_CONFIG: Record<EnergyLevel, { label: string; icon: string; c
 
 // Energy Balance by user state (points available for today's tasks)
 export const ENERGY_BALANCE: Record<UserState, number> = {
-  grounded: 14,
+  grounded: 18,
   scattered: 9,
-  tired: 5,
+  tired: 6,
 }
 
 export const USER_STATE_CONFIG: Record<UserState, {
@@ -101,7 +101,7 @@ export const USER_STATE_CONFIG: Record<UserState, {
     label: 'Grounded',
     icon: '🌱',
     color: '#7ea88f',
-    energyBalance: 14,
+    energyBalance: 18,
     description: 'Full energy, clear mind, ready for challenges',
   },
   scattered: {
@@ -115,7 +115,7 @@ export const USER_STATE_CONFIG: Record<UserState, {
     label: 'Tired',
     icon: '😴',
     color: '#c9887a',
-    energyBalance: 5,
+    energyBalance: 6,
     description: 'Limited energy, needs rest, light tasks only',
   },
 }
