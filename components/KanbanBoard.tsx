@@ -16,6 +16,7 @@ import { KanbanColumn } from './KanbanColumn'
 import { AddTaskModal } from './AddTaskModal'
 import { OverCapacityDialog } from './OverCapacityDialog'
 import { getTaskWeight, getSelectedWeight, getEnergyBalance } from '@/utils/flowMeter'
+import { EnergyProgressBar } from './EnergyProgressBar'
 
 interface KanbanBoardProps {
   tasks: Task[]
@@ -318,6 +319,17 @@ export function KanbanBoard({ tasks, setTasks, labels, setLabels, userState, set
 
   return (
     <>
+      {/* Energy Progress Bar - Above Today's Tasks */}
+      {userState && (
+        <div className="mb-4 p-4 bg-surface-base border-subtle rounded-xl">
+          <EnergyProgressBar
+            used={selectedWeight}
+            total={energyBalance}
+            showLabel={true}
+          />
+        </div>
+      )}
+
       {/* Today's 3 Bar */}
       {todaysTasks.length > 0 && (
         <div className="mb-4 p-3 bg-surface-base border-subtle rounded-xl">

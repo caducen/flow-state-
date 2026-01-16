@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { Task, TodoItem, Note, Label, UserState, DEFAULT_LABELS } from '@/types'
+import { getSelectedWeight, getEnergyBalance } from '@/utils/flowMeter'
 import { KanbanBoard } from '@/components/KanbanBoard'
 import { TodoList } from '@/components/TodoList'
 import { NoteArea } from '@/components/NoteArea'
@@ -10,6 +11,7 @@ import { QuickTasks, QuickTask } from '@/components/QuickTasks'
 import { CheckInSection } from '@/components/CheckInSection'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { SettingsPanel } from '@/components/SettingsPanel'
+import { EnergyCursor } from '@/components/EnergyCursor'
 
 export default function Home() {
   const [tasks, setTasks] = useLocalStorage<Task[]>('flow-tasks-v2', [])
@@ -18,6 +20,7 @@ export default function Home() {
   const [quickTasks, setQuickTasks] = useLocalStorage<QuickTask[]>('flow-quick-tasks', [])
   const [labels, setLabels] = useLocalStorage<Label[]>('flow-labels', DEFAULT_LABELS)
   const [userState, setUserState] = useLocalStorage<UserState | null>('flow-user-state', null)
+  const [energyCursorEnabled, setEnergyCursorEnabled] = useLocalStorage<boolean>('energyCursorEnabled', false)
   const [promotedTodo, setPromotedTodo] = useState<{ text: string; id: string } | null>(null)
 
   const handlePromoteTodo = useCallback((text: string, todoId: string) => {
@@ -30,8 +33,20 @@ export default function Home() {
     setPromotedTodo(null)
   }, [])
 
+  // Calculate energy values for the progress bar
+  const selectedWeight = getSelectedWeight(tasks)
+  const energyBalance = getEnergyBalance(userState)
+
   return (
-    <div className="min-h-screen p-6 md:p-10">
+    <>
+      {/* Energy Cursor - Custom cursor based on capacity */}
+      <EnergyCursor
+        enabled={energyCursorEnabled}
+        selectedWeight={selectedWeight}
+        energyBalance={energyBalance}
+      />
+
+      <div className="min-h-screen p-6 md:p-10">
       {/* Header */}
       <header className="mb-10 animate-fade-in">
         <div className="flex items-start justify-between">
@@ -50,7 +65,10 @@ export default function Home() {
           {/* Theme Toggle + Settings */}
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <SettingsPanel />
+            <SettingsPanel
+              energyCursorEnabled={energyCursorEnabled}
+              onEnergyCursorChange={setEnergyCursorEnabled}
+            />
           </div>
         </div>
       </header>
@@ -68,7 +86,12 @@ export default function Home() {
       <div className="flex flex-col xl:flex-row gap-8">
         {/* Left Column - Quick Tasks */}
         <div className="animate-slide-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
-          <QuickTasks tasks={quickTasks} setTasks={setQuickTasks} />
+          <QuickTasks
+            tasks={quickTasks}
+            setTasks={setQuickTasks}
+            selectedWeight={selectedWeight}
+            energyBalance={energyBalance}
+          />
         </div>
 
         {/* Center - Kanban Board */}
@@ -91,6 +114,7 @@ export default function Home() {
           <NoteArea notes={notes} setNotes={setNotes} />
         </aside>
       </div>
-    </div>
+      </div>
+    </>
   )
 }

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <defs>
+    <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#glow-red)">
+    <!-- Arrow shape -->
+    <path d="M8 4 L8 24 L12 20 L16 28 L20 26 L16 18 L22 18 Z"
+          fill="#f43f5e"
+          stroke="#9f1239"
+          stroke-width="1.5"
+          stroke-linejoin="round"/>
+  </g>
+</svg>

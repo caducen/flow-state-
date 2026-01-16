@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { EnergyProgressBar } from './EnergyProgressBar'
 
 interface QuickTask {
   id: string
@@ -11,9 +12,11 @@ interface QuickTask {
 interface QuickTasksProps {
   tasks: QuickTask[]
   setTasks: (tasks: QuickTask[] | ((prev: QuickTask[]) => QuickTask[])) => void
+  selectedWeight?: number  // Energy points used
+  energyBalance?: number   // Total energy points available
 }
 
-export function QuickTasks({ tasks, setTasks }: QuickTasksProps) {
+export function QuickTasks({ tasks, setTasks, selectedWeight, energyBalance }: QuickTasksProps) {
   const [newTask, setNewTask] = useState('')
 
   const handleAddTask = (e: React.FormEvent) => {
@@ -49,8 +52,26 @@ export function QuickTasks({ tasks, setTasks }: QuickTasksProps) {
       <div className="flex items-center gap-3 mb-4">
         <span className="w-2 h-2 rounded-full bg-violet-400" />
         <h2 className="font-display text-base font-medium text-ink-rich">Quick Tasks</h2>
-        {tasks.length > 0 && (
+
+        {/* Energy Progress Bar - Desktop only */}
+        {selectedWeight !== undefined && energyBalance !== undefined && (
+          <div className="hidden lg:block ml-auto">
+            <EnergyProgressBar
+              used={selectedWeight}
+              total={energyBalance}
+              compact={true}
+            />
+          </div>
+        )}
+
+        {/* Task count - shown when no energy bar or on mobile */}
+        {tasks.length > 0 && (selectedWeight === undefined || energyBalance === undefined) && (
           <span className="text-xs text-ink-faint font-mono ml-auto">
+            {completedCount}/{tasks.length}
+          </span>
+        )}
+        {tasks.length > 0 && selectedWeight !== undefined && energyBalance !== undefined && (
+          <span className="text-xs text-ink-faint font-mono lg:hidden ml-auto">
             {completedCount}/{tasks.length}
           </span>
         )}

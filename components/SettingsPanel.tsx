@@ -2,7 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react'
 
-export function SettingsPanel() {
+interface SettingsPanelProps {
+  energyCursorEnabled?: boolean
+  onEnergyCursorChange?: (enabled: boolean) => void
+}
+
+export function SettingsPanel({ energyCursorEnabled = false, onEnergyCursorChange }: SettingsPanelProps) {
   const [isOpen, setIsOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
 
@@ -76,10 +81,51 @@ export function SettingsPanel() {
             z-50
           "
         >
-          <h3 className="text-sm font-medium text-ink-rich mb-3">Settings</h3>
+          <h3 className="text-sm font-medium text-ink-rich mb-4">Settings</h3>
 
-          <div className="text-sm text-ink-muted">
-            More settings coming soon...
+          {/* Energy Cursor Toggle */}
+          <div className="space-y-4">
+            <div
+              className="flex items-start gap-3 cursor-pointer group"
+              onClick={(e) => {
+                e.stopPropagation()
+                onEnergyCursorChange?.(!energyCursorEnabled)
+              }}
+            >
+              {/* Toggle Switch */}
+              <div className="relative flex-shrink-0 mt-0.5">
+                <div className={`
+                  w-9 h-5 rounded-full
+                  transition-colors duration-200
+                  ${energyCursorEnabled ? 'bg-amber-glow/80' : 'bg-surface-overlay'}
+                `} />
+                <div className={`
+                  absolute left-0.5 top-0.5
+                  w-4 h-4 rounded-full
+                  bg-white shadow-sm
+                  transition-transform duration-200
+                  ${energyCursorEnabled ? 'translate-x-4' : 'translate-x-0'}
+                `} />
+              </div>
+
+              {/* Label and description */}
+              <div className="flex-1">
+                <span className="text-sm font-medium text-ink-rich group-hover:text-amber-glow transition-colors">
+                  Energy Cursor
+                </span>
+                <p className="text-xs text-ink-muted mt-0.5 leading-relaxed">
+                  Custom cursor that changes color based on your capacity usage
+                </p>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="border-t border-subtle" />
+
+            {/* Placeholder for more settings */}
+            <p className="text-xs text-ink-faint italic">
+              More settings coming soon...
+            </p>
           </div>
         </div>
       )}
