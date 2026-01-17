@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { Task, Label, Priority, EnergyLevel, Subtask, PRIORITY_CONFIG, ENERGY_CONFIG, PRIORITY_POINTS, ENERGY_POINTS } from '@/types'
 import { getWeightCategory, WEIGHT_CATEGORY_CONFIG } from '@/utils/flowMeter'
 
@@ -33,6 +34,13 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
 
   const weightCategory = useMemo(() => getWeightCategory(taskWeight), [taskWeight])
   const weightConfig = WEIGHT_CATEGORY_CONFIG[weightCategory]
+
+  // Track if component is mounted (for portal)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -100,7 +108,10 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
     )
   }
 
-  return (
+  // Don't render until mounted (needed for portal)
+  if (!mounted) return null
+
+  const modalContent = (
     <div
       className="fixed top-0 left-0 w-full h-full min-h-[100dvh] z-[9999] bg-surface-base overflow-y-auto"
       role="dialog"
@@ -418,4 +429,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
             </form>
     </div>
   )
+
+  // Render modal at document body level using portal
+  return createPortal(modalContent, document.body)
 }
