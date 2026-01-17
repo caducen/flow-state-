@@ -44,9 +44,18 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
 
   // Lock body scroll when modal is open
   useEffect(() => {
+    const scrollY = window.scrollY
     document.body.style.overflow = 'hidden'
+    document.body.style.position = 'fixed'
+    document.body.style.top = `-${scrollY}px`
+    document.body.style.width = '100%'
+
     return () => {
       document.body.style.overflow = ''
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      window.scrollTo(0, scrollY)
     }
   }, [])
 
@@ -113,7 +122,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
 
   const modalContent = (
     <div
-      className="fixed inset-0 z-[9999] sm:flex sm:items-center sm:justify-center sm:p-4"
+      className="fixed inset-0 z-[9999] touch-pan-y sm:flex sm:items-center sm:justify-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -127,7 +136,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
       {/* Modal card - full screen on mobile, centered card on desktop */}
       <div
         ref={modalRef}
-        className="relative h-full w-full overflow-y-auto bg-surface-base
+        className="relative h-full w-full overflow-y-auto overflow-x-hidden overscroll-contain bg-surface-base
           sm:h-auto sm:max-h-[90vh] sm:w-full sm:max-w-md sm:rounded-2xl sm:border-subtle sm:shadow-2xl"
       >
         {/* Header */}
@@ -224,7 +233,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full bg-surface-raised border-subtle rounded-xl px-4 py-3
+                  className="w-full max-w-full box-border bg-surface-raised border-subtle rounded-xl px-4 py-3
                     text-ink-rich text-sm
                     focus:border-amber-glow/50 focus:shadow-glow-sm
                     transition-all duration-200
