@@ -102,24 +102,14 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
 
   return (
     <div
-      className="fixed inset-0 z-50"
+      className="fixed top-0 left-0 w-full h-full min-h-[100dvh] z-[9999] bg-surface-base overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
+      style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
     >
-      {/* Backdrop - only visible on desktop */}
-      <div
-        className="hidden sm:block fixed inset-0 bg-black/70 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Modal - full screen scrollable on mobile, centered card on desktop */}
-      <div
-        ref={modalRef}
-        className="fixed inset-0 overflow-y-auto bg-surface-base sm:inset-4 sm:rounded-2xl sm:border-subtle sm:shadow-2xl"
-      >
-        {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/5 bg-surface-base sm:rounded-t-2xl">
+      {/* Header */}
+      <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/5 bg-surface-base">
               <h2 id="modal-title" className="font-display text-xl font-medium text-ink-rich">
                 {isEditing ? 'Edit Task' : 'New Task'}
               </h2>
@@ -426,7 +416,6 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+    </div>
   )
 }
