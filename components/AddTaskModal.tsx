@@ -111,8 +111,17 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
     )
   }
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = originalStyle
+    }
+  }, [])
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in"
@@ -121,11 +130,11 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
       />
 
       {/* Modal */}
-      <div ref={modalRef} className="relative w-full max-w-lg max-h-[90vh] animate-scale-in">
-        <div className="bg-surface-base border-subtle rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh]">
-          {/* Ambient glow */}
-          <div className="absolute -top-20 -left-20 w-40 h-40 bg-amber-glow/20 rounded-full blur-3xl" />
-          <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-rose-accent/10 rounded-full blur-3xl" />
+      <div ref={modalRef} className="relative w-full max-w-lg animate-scale-in overflow-hidden">
+        <div className="bg-surface-base border-subtle rounded-2xl shadow-2xl overflow-y-auto overflow-x-hidden max-h-[85vh] overscroll-contain [-webkit-overflow-scrolling:touch]">
+          {/* Ambient glow - contained within modal */}
+          <div className="absolute top-0 left-0 w-40 h-40 bg-amber-glow/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-40 h-40 bg-rose-accent/10 rounded-full blur-3xl pointer-events-none" />
 
           {/* Header */}
           <div className="relative flex items-center justify-between p-5 border-b border-white/5">
