@@ -102,27 +102,25 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+      className="fixed inset-0 z-50"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      {/* Full screen scrollable container */}
+      {/* Backdrop - only visible on desktop */}
       <div
-        className="absolute inset-0 overflow-y-auto"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) onClose()
-        }}
-      >
-        {/* Centered content wrapper with padding */}
-        <div className="min-h-full flex items-start sm:items-center justify-center p-4 py-8">
-          {/* Modal card */}
-          <div
-            ref={modalRef}
-            className="relative w-full max-w-lg bg-surface-base border-subtle rounded-2xl shadow-2xl"
-          >
-            {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/5 bg-surface-base rounded-t-2xl">
+        className="hidden sm:block absolute inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal - full screen on mobile, centered card on desktop */}
+      <div className="absolute inset-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-lg sm:max-h-[90vh]">
+        <div
+          ref={modalRef}
+          className="h-full sm:h-auto sm:max-h-[90vh] bg-surface-base sm:border-subtle sm:rounded-2xl sm:shadow-2xl flex flex-col overflow-hidden"
+        >
+          {/* Header */}
+          <div className="flex-shrink-0 flex items-center justify-between p-5 border-b border-white/5 bg-surface-base sm:rounded-t-2xl">
               <h2 id="modal-title" className="font-display text-xl font-medium text-ink-rich">
                 {isEditing ? 'Edit Task' : 'New Task'}
               </h2>
@@ -137,8 +135,8 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
               </button>
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit} className="p-5 space-y-5">
+            {/* Form - scrollable area */}
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-5">
               {/* Title */}
               <div>
                 <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
