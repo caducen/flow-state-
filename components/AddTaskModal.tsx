@@ -113,13 +113,13 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
         onClick={onClose}
       />
 
-      {/* Modal - full screen on mobile, centered card on desktop */}
+      {/* Modal - full screen scrollable on mobile, centered card on desktop */}
       <div
         ref={modalRef}
-        className="fixed inset-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-lg sm:max-h-[85vh] bg-surface-base sm:border-subtle sm:rounded-2xl sm:shadow-2xl flex flex-col overflow-hidden"
+        className="fixed inset-0 overflow-y-auto bg-surface-base sm:inset-4 sm:rounded-2xl sm:border-subtle sm:shadow-2xl"
       >
         {/* Header */}
-        <div className="flex-shrink-0 flex items-center justify-between p-5 border-b border-white/5 bg-surface-base sm:rounded-t-2xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/5 bg-surface-base sm:rounded-t-2xl">
               <h2 id="modal-title" className="font-display text-xl font-medium text-ink-rich">
                 {isEditing ? 'Edit Task' : 'New Task'}
               </h2>
@@ -134,8 +134,8 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
               </button>
             </div>
 
-            {/* Form - scrollable area */}
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-5">
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="p-5 space-y-5">
               {/* Title */}
               <div>
                 <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
