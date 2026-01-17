@@ -177,6 +177,7 @@ export function TaskList({
                     e.stopPropagation()
                     handleToggleTodayTask(task.id)
                   }}
+                  title={task.isTodayTask ? "Remove from today's focus" : "Add to today's focus (max 3)"}
                   className={`mt-0.5 transition-colors ${
                     task.isTodayTask ? 'text-amber-glow' : 'text-ink-faint/30 hover:text-amber-glow/50'
                   }`}
