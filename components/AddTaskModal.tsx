@@ -34,32 +34,21 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
   const weightCategory = useMemo(() => getWeightCategory(taskWeight), [taskWeight])
   const weightConfig = WEIGHT_CATEGORY_CONFIG[weightCategory]
 
-  // Handle escape key and focus trapping
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [])
+
+  // Handle escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose()
-        return
-      }
-
-      // Focus trapping
-      if (e.key === 'Tab' && modalRef.current) {
-        const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        )
-        const firstElement = focusableElements[0]
-        const lastElement = focusableElements[focusableElements.length - 1]
-
-        if (e.shiftKey && document.activeElement === firstElement) {
-          e.preventDefault()
-          lastElement?.focus()
-        } else if (!e.shiftKey && document.activeElement === lastElement) {
-          e.preventDefault()
-          firstElement?.focus()
-        }
       }
     }
-
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
@@ -111,85 +100,81 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
     )
   }
 
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    const originalStyle = window.getComputedStyle(document.body).overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = originalStyle
-    }
-  }, [])
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      {/* Backdrop */}
+    <div
+      className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      {/* Full screen scrollable container */}
       <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Modal */}
-      <div ref={modalRef} className="relative w-full max-w-lg animate-scale-in overflow-hidden">
-        <div className="bg-surface-base border-subtle rounded-2xl shadow-2xl overflow-y-auto overflow-x-hidden max-h-[85vh] overscroll-contain [-webkit-overflow-scrolling:touch]">
-          {/* Ambient glow - contained within modal */}
-          <div className="absolute top-0 left-0 w-40 h-40 bg-amber-glow/20 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 right-0 w-40 h-40 bg-rose-accent/10 rounded-full blur-3xl pointer-events-none" />
-
-          {/* Header */}
-          <div className="relative flex items-center justify-between p-5 border-b border-white/5">
-            <h2 id="modal-title" className="font-display text-xl font-medium text-ink-rich">{isEditing ? 'Edit Task' : 'New Task'}</h2>
-            <button
-              onClick={onClose}
-              aria-label="Close modal"
-              className="text-ink-muted hover:text-ink-rich transition-colors p-1 hover:bg-surface-raised rounded-lg"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="relative p-5 space-y-5">
-            {/* Title */}
-            <div>
-              <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
-                Title
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="What needs to be done?"
-                autoFocus
-                className="w-full bg-surface-raised border-subtle rounded-xl px-4 py-3
-                  text-ink-rich placeholder-ink-faint
-                  focus:border-amber-glow/50 focus:shadow-glow-sm
-                  transition-all duration-200"
-              />
+        className="absolute inset-0 overflow-y-auto"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose()
+        }}
+      >
+        {/* Centered content wrapper with padding */}
+        <div className="min-h-full flex items-start sm:items-center justify-center p-4 py-8">
+          {/* Modal card */}
+          <div
+            ref={modalRef}
+            className="relative w-full max-w-lg bg-surface-base border-subtle rounded-2xl shadow-2xl"
+          >
+            {/* Header */}
+            <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/5 bg-surface-base rounded-t-2xl">
+              <h2 id="modal-title" className="font-display text-xl font-medium text-ink-rich">
+                {isEditing ? 'Edit Task' : 'New Task'}
+              </h2>
+              <button
+                onClick={onClose}
+                aria-label="Close modal"
+                className="text-ink-muted hover:text-ink-rich transition-colors p-1 hover:bg-surface-raised rounded-lg"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
 
-            {/* Description */}
-            <div>
-              <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
-                Description
-                <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
-              </label>
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Add some details..."
-                rows={2}
-                className="w-full bg-surface-raised border-subtle rounded-xl px-4 py-3
-                  text-ink-rich placeholder-ink-faint resize-none
-                  focus:border-amber-glow/50 focus:shadow-glow-sm
-                  transition-all duration-200"
-              />
-            </div>
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="p-5 space-y-5">
+              {/* Title */}
+              <div>
+                <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="What needs to be done?"
+                  autoFocus
+                  className="w-full bg-surface-raised border-subtle rounded-xl px-4 py-3
+                    text-ink-rich placeholder-ink-faint
+                    focus:border-amber-glow/50 focus:shadow-glow-sm
+                    transition-all duration-200"
+                />
+              </div>
 
-            {/* Priority & Due Date Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Description */}
+              <div>
+                <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                  Description
+                  <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Add some details..."
+                  rows={2}
+                  className="w-full bg-surface-raised border-subtle rounded-xl px-4 py-3
+                    text-ink-rich placeholder-ink-faint resize-none
+                    focus:border-amber-glow/50 focus:shadow-glow-sm
+                    transition-all duration-200"
+                />
+              </div>
+
               {/* Priority */}
               <div>
                 <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
@@ -230,59 +215,57 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full bg-surface-raised border-subtle rounded-xl px-4 py-2.5
+                  className="w-full bg-surface-raised border-subtle rounded-xl px-4 py-3
                     text-ink-rich text-sm
                     focus:border-amber-glow/50 focus:shadow-glow-sm
                     transition-all duration-200
                     [color-scheme:dark]"
                 />
               </div>
-            </div>
 
-            {/* Energy Level */}
-            <div>
-              <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
-                Energy Required
-                <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
-              </label>
-              <div className="flex gap-2">
-                {(Object.keys(ENERGY_CONFIG) as EnergyLevel[]).map((e) => (
-                  <button
-                    key={e}
-                    type="button"
-                    onClick={() => setEnergyLevel(energyLevel === e ? undefined : e)}
-                    className={`
-                      flex-1 px-3 py-2 text-xs font-medium rounded-lg
-                      border transition-all duration-200
-                      ${energyLevel === e
-                        ? 'border-transparent'
-                        : 'border-subtle bg-surface-raised hover:bg-surface-overlay text-ink-muted'
-                      }
-                    `}
-                    style={energyLevel === e ? {
-                      backgroundColor: ENERGY_CONFIG[e].bgColor,
-                      color: ENERGY_CONFIG[e].color,
-                    } : {}}
-                  >
-                    <span className="mr-1">{ENERGY_CONFIG[e].icon}</span>
-                    {e.charAt(0).toUpperCase() + e.slice(1)}
-                  </button>
-                ))}
+              {/* Energy Level */}
+              <div>
+                <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                  Energy Required
+                  <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
+                </label>
+                <div className="flex gap-2">
+                  {(Object.keys(ENERGY_CONFIG) as EnergyLevel[]).map((e) => (
+                    <button
+                      key={e}
+                      type="button"
+                      onClick={() => setEnergyLevel(energyLevel === e ? undefined : e)}
+                      className={`
+                        flex-1 px-3 py-2 text-xs font-medium rounded-lg
+                        border transition-all duration-200
+                        ${energyLevel === e
+                          ? 'border-transparent'
+                          : 'border-subtle bg-surface-raised hover:bg-surface-overlay text-ink-muted'
+                        }
+                      `}
+                      style={energyLevel === e ? {
+                        backgroundColor: ENERGY_CONFIG[e].bgColor,
+                        color: ENERGY_CONFIG[e].color,
+                      } : {}}
+                    >
+                      <span className="mr-1">{ENERGY_CONFIG[e].icon}</span>
+                      {e.charAt(0).toUpperCase() + e.slice(1)}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Task Weight Indicator */}
-            <div
-              className="p-4 rounded-xl border transition-all duration-300"
-              style={{
-                backgroundColor: `${weightConfig.color}10`,
-                borderColor: `${weightConfig.color}30`,
-              }}
-            >
-              <div className="flex items-center justify-between">
+              {/* Task Weight Indicator */}
+              <div
+                className="p-4 rounded-xl border transition-all duration-300"
+                style={{
+                  backgroundColor: `${weightConfig.color}10`,
+                  borderColor: `${weightConfig.color}30`,
+                }}
+              >
                 <div className="flex items-center gap-3">
                   <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold"
+                    className="w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold flex-shrink-0"
                     style={{
                       backgroundColor: `${weightConfig.color}20`,
                       color: weightConfig.color,
@@ -308,145 +291,145 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Labels */}
-            <div>
-              <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
-                Labels
-                <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {labels.map(label => (
-                  <button
-                    key={label.id}
-                    type="button"
-                    onClick={() => toggleLabel(label.id)}
-                    className={`
-                      text-xs font-medium px-3 py-1.5 rounded-full
-                      border transition-all duration-200
-                      ${selectedLabels.includes(label.id)
-                        ? 'border-transparent'
-                        : 'border-subtle bg-surface-raised hover:bg-surface-overlay text-ink-muted'
-                      }
-                    `}
-                    style={selectedLabels.includes(label.id) ? {
-                      backgroundColor: `${label.color}20`,
-                      color: label.color,
-                    } : {}}
-                  >
-                    {label.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Subtasks */}
-            <div>
-              <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
-                Subtasks
-                <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
-              </label>
-
-              {/* Existing subtasks */}
-              {subtasks.length > 0 && (
-                <div className="space-y-2 mb-3">
-                  {subtasks.map(subtask => (
-                    <div
-                      key={subtask.id}
-                      className="flex items-center gap-2 group"
+              {/* Labels */}
+              <div>
+                <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                  Labels
+                  <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {labels.map(label => (
+                    <button
+                      key={label.id}
+                      type="button"
+                      onClick={() => toggleLabel(label.id)}
+                      className={`
+                        text-xs font-medium px-3 py-1.5 rounded-full
+                        border transition-all duration-200
+                        ${selectedLabels.includes(label.id)
+                          ? 'border-transparent'
+                          : 'border-subtle bg-surface-raised hover:bg-surface-overlay text-ink-muted'
+                        }
+                      `}
+                      style={selectedLabels.includes(label.id) ? {
+                        backgroundColor: `${label.color}20`,
+                        color: label.color,
+                      } : {}}
                     >
-                      <button
-                        type="button"
-                        onClick={() => toggleSubtask(subtask.id)}
-                        className={`
-                          w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center
-                          transition-all duration-200
-                          ${subtask.completed
-                            ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
-                            : 'border-subtle hover:border-ink-muted'
-                          }
-                        `}
-                      >
-                        {subtask.completed && (
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </button>
-                      <span className={`flex-1 text-sm ${subtask.completed ? 'text-ink-faint line-through' : 'text-ink-rich'}`}>
-                        {subtask.text}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => removeSubtask(subtask.id)}
-                        className="opacity-0 group-hover:opacity-100 text-ink-faint hover:text-rose-400 transition-all"
-                      >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
+                      {label.name}
+                    </button>
                   ))}
                 </div>
-              )}
+              </div>
 
-              {/* Add new subtask */}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newSubtaskText}
-                  onChange={(e) => setNewSubtaskText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      addSubtask()
-                    }
-                  }}
-                  placeholder="Add a subtask..."
-                  className="flex-1 bg-surface-raised border-subtle rounded-lg px-3 py-2
-                    text-sm text-ink-rich placeholder-ink-faint
-                    focus:border-amber-glow/50 focus:shadow-glow-sm
-                    transition-all duration-200"
-                />
+              {/* Subtasks */}
+              <div>
+                <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                  Subtasks
+                  <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
+                </label>
+
+                {/* Existing subtasks */}
+                {subtasks.length > 0 && (
+                  <div className="space-y-2 mb-3">
+                    {subtasks.map(subtask => (
+                      <div
+                        key={subtask.id}
+                        className="flex items-center gap-2 group"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => toggleSubtask(subtask.id)}
+                          className={`
+                            w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center
+                            transition-all duration-200
+                            ${subtask.completed
+                              ? 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400'
+                              : 'border-subtle hover:border-ink-muted'
+                            }
+                          `}
+                        >
+                          {subtask.completed && (
+                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </button>
+                        <span className={`flex-1 text-sm ${subtask.completed ? 'text-ink-faint line-through' : 'text-ink-rich'}`}>
+                          {subtask.text}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeSubtask(subtask.id)}
+                          className="opacity-0 group-hover:opacity-100 text-ink-faint hover:text-rose-400 transition-all"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add new subtask */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newSubtaskText}
+                    onChange={(e) => setNewSubtaskText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        addSubtask()
+                      }
+                    }}
+                    placeholder="Add a subtask..."
+                    className="flex-1 bg-surface-raised border-subtle rounded-lg px-3 py-2
+                      text-sm text-ink-rich placeholder-ink-faint
+                      focus:border-amber-glow/50 focus:shadow-glow-sm
+                      transition-all duration-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={addSubtask}
+                    disabled={!newSubtaskText.trim()}
+                    className="px-3 py-2 text-sm bg-surface-raised border-subtle rounded-lg
+                      text-ink-muted hover:text-ink-rich hover:bg-surface-overlay
+                      disabled:opacity-40 disabled:cursor-not-allowed
+                      transition-all duration-200"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+
+              {/* Actions - sticky at bottom */}
+              <div className="flex justify-end gap-3 pt-2 pb-2">
                 <button
                   type="button"
-                  onClick={addSubtask}
-                  disabled={!newSubtaskText.trim()}
-                  className="px-3 py-2 text-sm bg-surface-raised border-subtle rounded-lg
-                    text-ink-muted hover:text-ink-rich hover:bg-surface-overlay
-                    disabled:opacity-40 disabled:cursor-not-allowed
+                  onClick={onClose}
+                  className="px-5 py-2.5 text-sm text-ink-muted hover:text-ink-rich
+                    rounded-xl transition-colors hover:bg-surface-raised"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!title.trim()}
+                  className="px-5 py-2.5 text-sm font-medium
+                    bg-gradient-to-r from-amber-glow to-amber-soft text-surface-deep
+                    rounded-xl shadow-glow-sm
+                    hover:shadow-glow-md hover:-translate-y-0.5
+                    disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-glow-sm
                     transition-all duration-200"
                 >
-                  Add
+                  {isEditing ? 'Save Changes' : 'Add Task'}
                 </button>
               </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-5 py-2.5 text-sm text-ink-muted hover:text-ink-rich
-                  rounded-xl transition-colors hover:bg-surface-raised"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={!title.trim()}
-                className="px-5 py-2.5 text-sm font-medium
-                  bg-gradient-to-r from-amber-glow to-amber-soft text-surface-deep
-                  rounded-xl shadow-glow-sm
-                  hover:shadow-glow-md hover:-translate-y-0.5
-                  disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-glow-sm
-                  transition-all duration-200"
-              >
-                {isEditing ? 'Save Changes' : 'Add Task'}
-              </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     </div>
