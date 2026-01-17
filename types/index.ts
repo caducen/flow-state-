@@ -2,7 +2,40 @@ export type Priority = 'high' | 'medium' | 'low'
 export type EnergyLevel = 'high' | 'medium' | 'low'
 export type UserState = 'grounded' | 'scattered' | 'tired'
 
-// Point values for task weight calculation
+// Energy Settings - User-customizable values
+export interface EnergySettings {
+  // Daily energy states
+  grounded: number
+  scattered: number
+  tired: number
+  // Task weight: priority
+  priorityHigh: number
+  priorityMed: number
+  priorityLow: number
+  // Task weight: energy level
+  energyHigh: number
+  energyMed: number
+  energyLow: number
+  // Metadata
+  customized: boolean
+  lastUpdated: string
+}
+
+export const DEFAULT_ENERGY_SETTINGS: EnergySettings = {
+  grounded: 18,
+  scattered: 9,
+  tired: 6,
+  priorityHigh: 3,
+  priorityMed: 2,
+  priorityLow: 1,
+  energyHigh: 3,
+  energyMed: 2,
+  energyLow: 1,
+  customized: false,
+  lastUpdated: new Date().toISOString(),
+}
+
+// Point values for task weight calculation (defaults - use EnergySettings for dynamic values)
 export const PRIORITY_POINTS: Record<Priority, number> = {
   high: 3,
   medium: 2,

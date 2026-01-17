@@ -1,19 +1,42 @@
-import { Task, EnergyLevel, PRIORITY_POINTS, ENERGY_POINTS, ENERGY_BALANCE, UserState } from '@/types'
+import { Task, EnergyLevel, Priority, PRIORITY_POINTS, ENERGY_POINTS, ENERGY_BALANCE, UserState, EnergySettings, DEFAULT_ENERGY_SETTINGS } from '@/types'
 
 export type CapacityZone = 'under' | 'balanced' | 'over'
 export type EnergyZone = 'full' | 'good' | 'half' | 'low' | 'warning' | 'critical' | 'overloaded'
 
-// Maximum energy (Grounded state) - used as the "full tank"
-const MAX_ENERGY = 18
 export type WeightCategory = 'light' | 'medium' | 'heavy'
+
+// Helper to get priority points from settings
+function getPriorityPointsFromSettings(priority: Priority, settings?: EnergySettings): number {
+  if (!settings) return PRIORITY_POINTS[priority]
+  switch (priority) {
+    case 'high': return settings.priorityHigh
+    case 'medium': return settings.priorityMed
+    case 'low': return settings.priorityLow
+  }
+}
+
+// Helper to get energy points from settings
+function getEnergyPointsFromSettings(energyLevel: EnergyLevel, settings?: EnergySettings): number {
+  if (!settings) return ENERGY_POINTS[energyLevel]
+  switch (energyLevel) {
+    case 'high': return settings.energyHigh
+    case 'medium': return settings.energyMed
+    case 'low': return settings.energyLow
+  }
+}
+
+// Helper to get max energy from settings (grounded is always max)
+function getMaxEnergyFromSettings(settings?: EnergySettings): number {
+  return settings?.grounded ?? DEFAULT_ENERGY_SETTINGS.grounded
+}
 
 /**
  * Calculate base task weight from priority + energy
- * Range: 2 (low+low) to 6 (high+high)
+ * Range: 2 (low+low) to 6 (high+high) with default settings
  */
-export function getBaseTaskWeight(task: Task): number {
-  const priorityPoints = PRIORITY_POINTS[task.priority]
-  const energyPoints = ENERGY_POINTS[task.energyLevel ?? 'medium']
+export function getBaseTaskWeight(task: Task, settings?: EnergySettings): number {
+  const priorityPoints = getPriorityPointsFromSettings(task.priority, settings)
+  const energyPoints = getEnergyPointsFromSettings(task.energyLevel ?? 'medium', settings)
   return priorityPoints + energyPoints
 }
 
@@ -21,8 +44,8 @@ export function getBaseTaskWeight(task: Task): number {
  * Calculate effective task weight accounting for progress
  * A task that's 75% done only costs 25% of its original weight
  */
-export function getTaskWeight(task: Task): number {
-  const baseWeight = getBaseTaskWeight(task)
+export function getTaskWeight(task: Task, settings?: EnergySettings): number {
+  const baseWeight = getBaseTaskWeight(task, settings)
   const progress = task.progress ?? 0
   const remainingWork = (100 - progress) / 100
   return Math.round(baseWeight * remainingWork * 10) / 10  // Round to 1 decimal
@@ -31,19 +54,23 @@ export function getTaskWeight(task: Task): number {
 /**
  * Get total weight of tasks marked for today
  */
-export function getSelectedWeight(tasks: Task[]): number {
+export function getSelectedWeight(tasks: Task[], settings?: EnergySettings): number {
   return tasks
     .filter(task => task.isTodayTask)
-    .reduce((sum, task) => sum + getTaskWeight(task), 0)
+    .reduce((sum, task) => sum + getTaskWeight(task, settings), 0)
 }
 
 /**
  * Get energy balance for a user state
- * Returns default (scattered=9) if no state selected
+ * Returns default (scattered) if no state selected
  */
-export function getEnergyBalance(userState: UserState | null): number {
-  if (!userState) return ENERGY_BALANCE.scattered
-  return ENERGY_BALANCE[userState]
+export function getEnergyBalance(userState: UserState | null, settings?: EnergySettings): number {
+  if (!settings) {
+    if (!userState) return ENERGY_BALANCE.scattered
+    return ENERGY_BALANCE[userState]
+  }
+  if (!userState) return settings.scattered
+  return settings[userState]
 }
 
 /**
@@ -91,11 +118,12 @@ export function getCapacityMessage(zone: CapacityZone): string {
 
 /**
  * Calculate remaining energy percentage (fuel gauge style)
- * Based on remaining energy out of MAX_ENERGY (18)
+ * Based on remaining energy out of max energy (grounded value)
  */
-export function getRemainingPercentage(selectedWeight: number, energyBalance: number): number {
+export function getRemainingPercentage(selectedWeight: number, energyBalance: number, settings?: EnergySettings): number {
+  const maxEnergy = getMaxEnergyFromSettings(settings)
   const remaining = Math.max(energyBalance - selectedWeight, 0)
-  return (remaining / MAX_ENERGY) * 100
+  return (remaining / maxEnergy) * 100
 }
 
 /**
@@ -109,10 +137,10 @@ export function getRemainingPercentage(selectedWeight: number, energyBalance: nu
  * 0-15%: Red (critical)
  * Over capacity: Red (overloaded)
  */
-export function getEnergyZone(selectedWeight: number, energyBalance: number): EnergyZone {
+export function getEnergyZone(selectedWeight: number, energyBalance: number, settings?: EnergySettings): EnergyZone {
   if (selectedWeight > energyBalance) return 'overloaded'
 
-  const remainingPercent = getRemainingPercentage(selectedWeight, energyBalance)
+  const remainingPercent = getRemainingPercentage(selectedWeight, energyBalance, settings)
 
   if (remainingPercent > 80) return 'full'
   if (remainingPercent > 60) return 'good'

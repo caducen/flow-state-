@@ -1,17 +1,18 @@
 'use client'
 
-import { Task, UserState, USER_STATE_CONFIG } from '@/types'
+import { Task, UserState, USER_STATE_CONFIG, EnergySettings, DEFAULT_ENERGY_SETTINGS } from '@/types'
 import { getSelectedWeight, getEnergyBalance, getEnergyZone, getEnergyZoneColor } from '@/utils/flowMeter'
 
 interface CheckInSectionProps {
   userState: UserState | null
   setUserState: (state: UserState | null) => void
   tasks: Task[]
+  energySettings?: EnergySettings
 }
 
-export function CheckInSection({ userState, setUserState, tasks }: CheckInSectionProps) {
-  const energyBalance = getEnergyBalance(userState)
-  const selectedWeight = getSelectedWeight(tasks)
+export function CheckInSection({ userState, setUserState, tasks, energySettings = DEFAULT_ENERGY_SETTINGS }: CheckInSectionProps) {
+  const energyBalance = getEnergyBalance(userState, energySettings)
+  const selectedWeight = getSelectedWeight(tasks, energySettings)
   const todayTaskCount = tasks.filter(t => t.isTodayTask).length
 
   return (
@@ -59,7 +60,7 @@ export function CheckInSection({ userState, setUserState, tasks }: CheckInSectio
                       color: config.color,
                     }}
                   >
-                    {config.energyBalance}pts
+                    {energySettings[state]}pts
                   </span>
                 )}
               </div>
@@ -112,7 +113,7 @@ export function CheckInSection({ userState, setUserState, tasks }: CheckInSectio
               <span className="text-ink-muted text-sm">Remaining:</span>
               <span
                 className="font-mono font-semibold"
-                style={{ color: getEnergyZoneColor(getEnergyZone(selectedWeight, energyBalance)) }}
+                style={{ color: getEnergyZoneColor(getEnergyZone(selectedWeight, energyBalance, energySettings)) }}
               >
                 {Math.max(energyBalance - selectedWeight, 0)}
               </span>

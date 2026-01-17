@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Task, Label, PROGRESS_CONFIG, PRIORITY_CONFIG, ENERGY_CONFIG } from '@/types'
+import { Task, Label, PROGRESS_CONFIG, PRIORITY_CONFIG, ENERGY_CONFIG, EnergySettings, DEFAULT_ENERGY_SETTINGS } from '@/types'
 import { getTaskWeight, getBaseTaskWeight } from '@/utils/flowMeter'
 import { AddTaskModal } from './AddTaskModal'
 
@@ -12,6 +12,7 @@ interface TaskListProps {
   setLabels: (labels: Label[] | ((prev: Label[]) => Label[])) => void
   promotedTodo?: { text: string; id: string } | null
   onPromotedTodoHandled?: () => void
+  energySettings?: EnergySettings
 }
 
 // Get progress color based on percentage
@@ -29,7 +30,8 @@ export function TaskList({
   labels,
   setLabels,
   promotedTodo,
-  onPromotedTodoHandled
+  onPromotedTodoHandled,
+  energySettings = DEFAULT_ENERGY_SETTINGS
 }: TaskListProps) {
   const [showModal, setShowModal] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
@@ -223,7 +225,7 @@ export function TaskList({
                     </svg>
                   </button>
                   <span className="text-xs text-ink-faint font-mono">
-                    {getTaskWeight(task)}/{getBaseTaskWeight(task)}
+                    {getTaskWeight(task, energySettings)}/{getBaseTaskWeight(task, energySettings)}
                   </span>
 
                   {/* Tooltip */}
@@ -234,9 +236,9 @@ export function TaskList({
                     >
                       <p className="text-xs text-ink-rich font-medium mb-2">Energy Cost</p>
                       <p className="text-xs text-ink-muted leading-relaxed mb-2">
-                        <span className="text-amber-glow font-mono">{getTaskWeight(task)}</span> = current cost
+                        <span className="text-amber-glow font-mono">{getTaskWeight(task, energySettings)}</span> = current cost
                         <br />
-                        <span className="text-ink-faint font-mono">{getBaseTaskWeight(task)}</span> = original cost
+                        <span className="text-ink-faint font-mono">{getBaseTaskWeight(task, energySettings)}</span> = original cost
                       </p>
                       <p className="text-xs text-ink-muted leading-relaxed mb-2">
                         As you make progress, the energy cost decreases. A task 75% done only costs 25% of its original energy.

@@ -1,11 +1,11 @@
 'use client'
 
-// Maximum energy (Grounded state) - used as the "full tank"
-const MAX_ENERGY = 18
+import { DEFAULT_ENERGY_SETTINGS } from '@/types'
 
 interface EnergyProgressBarProps {
   used: number        // Points used by selected tasks (e.g., 9)
   total: number       // Energy balance for current state (18/9/6)
+  maxEnergy?: number  // Customizable max energy (grounded value)
   compact?: boolean   // Compact mode for smaller displays
   showLabel?: boolean // Show "Energy" label
 }
@@ -13,12 +13,13 @@ interface EnergyProgressBarProps {
 export function EnergyProgressBar({
   used,
   total,
+  maxEnergy = DEFAULT_ENERGY_SETTINGS.grounded,
   compact = false,
   showLabel = true
 }: EnergyProgressBarProps) {
   // Calculate REMAINING energy (fuel gauge style)
   const remaining = Math.max(total - used, 0)
-  const percentage = (remaining / MAX_ENERGY) * 100
+  const percentage = (remaining / maxEnergy) * 100
   const isOverCapacity = used > total
   const displayPercentage = Math.max(percentage, 0)
 
@@ -68,7 +69,7 @@ export function EnergyProgressBar({
         </div>
         {/* Compact text - show remaining */}
         <span className={`text-xs font-mono ${getTextColor()}`}>
-          {remaining}/{MAX_ENERGY}
+          {remaining}/{maxEnergy}
         </span>
       </div>
     )
@@ -83,7 +84,7 @@ export function EnergyProgressBar({
         )}
         <div className="flex items-center gap-1.5">
           <span className={`text-sm font-mono font-medium ${getTextColor()}`}>
-            {remaining}/{MAX_ENERGY}
+            {remaining}/{maxEnergy}
           </span>
           <span className="text-xs text-ink-faint">remaining</span>
           {isOverCapacity && (

@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { Task, Label, UserState, DEFAULT_LABELS } from '@/types'
+import { useEnergySettings } from '@/hooks/useEnergySettings'
+import { Task, Label, UserState, DEFAULT_LABELS, EnergySettings } from '@/types'
 import { getSelectedWeight, getEnergyBalance } from '@/utils/flowMeter'
 import { TaskList } from '@/components/TaskList'
 import { QuickTodos, QuickTodo } from '@/components/QuickTodos'
@@ -11,6 +12,7 @@ import { ThemeToggle } from '@/components/ThemeToggle'
 import { SettingsPanel } from '@/components/SettingsPanel'
 import { EnergyCursor } from '@/components/EnergyCursor'
 import { EnergyProgressBar } from '@/components/EnergyProgressBar'
+import { EnergyCustomizationModal } from '@/components/EnergyCustomizationModal'
 
 export default function Home() {
   const [tasks, setTasks] = useLocalStorage<Task[]>('flow-tasks-v3', [])
@@ -18,7 +20,10 @@ export default function Home() {
   const [labels, setLabels] = useLocalStorage<Label[]>('flow-labels', DEFAULT_LABELS)
   const [userState, setUserState] = useLocalStorage<UserState | null>('flow-user-state', null)
   const [energyCursorEnabled, setEnergyCursorEnabled] = useLocalStorage<boolean>('energyCursorEnabled', false)
+  const [hasSeenOnboarding, setHasSeenOnboarding, onboardingLoaded] = useLocalStorage<boolean>('flow-seen-onboarding', false)
   const [promotedTodo, setPromotedTodo] = useState<{ text: string; id: string } | null>(null)
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false)
+  const { settings: energySettings, setSettings: setEnergySettings, resetToDefaults: resetEnergySettings } = useEnergySettings()
 
   // Migrate old tasks to new format (add progress field)
   useEffect(() => {
@@ -27,10 +32,33 @@ export default function Home() {
       setTasks(prev => prev.map(t => ({
         ...t,
         progress: t.progress ?? 0,
-        status: t.status === 'complete' ? 'archived' : 'active',
+        // Handle legacy 'complete' status from old format
+        status: (t.status as string) === 'complete' ? 'archived' : (t.status || 'active'),
       } as Task)))
     }
   }, [tasks, setTasks])
+
+  // Show onboarding modal for first-time users
+  useEffect(() => {
+    // Wait for localStorage to load before checking
+    if (!onboardingLoaded) return
+
+    // Only show if user hasn't seen onboarding yet
+    if (!hasSeenOnboarding) {
+      // Small delay for smooth entrance
+      const timer = setTimeout(() => {
+        setShowOnboardingModal(true)
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [hasSeenOnboarding, onboardingLoaded])
+
+  // Handle onboarding modal close
+  const handleOnboardingClose = useCallback((settings: EnergySettings, skipped: boolean) => {
+    setEnergySettings(settings)
+    setHasSeenOnboarding(true)
+    setShowOnboardingModal(false)
+  }, [setEnergySettings, setHasSeenOnboarding])
 
   const handlePromoteTodo = useCallback((text: string, todoId: string) => {
     setPromotedTodo({ text, id: todoId })
@@ -43,19 +71,27 @@ export default function Home() {
   }, [])
 
   // Calculate energy values for the cursor and progress bar
-  const selectedWeight = getSelectedWeight(tasks)
-  const energyBalance = getEnergyBalance(userState)
+  const selectedWeight = getSelectedWeight(tasks, energySettings)
+  const energyBalance = getEnergyBalance(userState, energySettings)
 
   // Count today's tasks
   const todayTaskCount = tasks.filter(t => t.isTodayTask && t.status === 'active').length
 
   return (
     <>
+      {/* First-time onboarding modal */}
+      <EnergyCustomizationModal
+        isOpen={showOnboardingModal}
+        onClose={handleOnboardingClose}
+        initialSettings={energySettings}
+      />
+
       {/* Energy Cursor - Custom cursor based on capacity */}
       <EnergyCursor
         enabled={energyCursorEnabled}
         selectedWeight={selectedWeight}
         energyBalance={energyBalance}
+        maxEnergy={energySettings.grounded}
       />
 
       <div className="min-h-screen p-4 md:p-6 lg:p-10">
@@ -63,11 +99,19 @@ export default function Home() {
         <header className="mb-8 animate-fade-in">
           <div className="flex items-start justify-between">
             <div>
-              <div className="flex items-baseline gap-3">
+              <div className="flex items-center gap-3">
                 <h1 className="font-display text-2xl md:text-3xl font-medium text-ink-rich tracking-tight">
                   Flow State
                 </h1>
-                <span className="text-amber-glow text-sm font-mono">●</span>
+                <video
+                  src="/Logo.mp4"
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="h-14 md:h-16 w-auto mix-blend-multiply rounded-xl"
+                  aria-hidden="true"
+                />
               </div>
               <p className="text-ink-muted mt-1 text-sm tracking-wide">
                 Organize your work, stay in the zone
@@ -93,7 +137,11 @@ export default function Home() {
               </label>
 
               <ThemeToggle />
-              <SettingsPanel />
+              <SettingsPanel
+                settings={energySettings}
+                onSettingsChange={setEnergySettings}
+                onReset={resetEnergySettings}
+              />
             </div>
           </div>
         </header>
@@ -104,6 +152,7 @@ export default function Home() {
             userState={userState}
             setUserState={setUserState}
             tasks={tasks}
+            energySettings={energySettings}
           />
         </div>
 
@@ -123,6 +172,7 @@ export default function Home() {
               <EnergyProgressBar
                 used={selectedWeight}
                 total={energyBalance}
+                maxEnergy={energySettings.grounded}
                 compact={false}
                 showLabel={false}
               />
@@ -150,6 +200,7 @@ export default function Home() {
               setLabels={setLabels}
               promotedTodo={promotedTodo}
               onPromotedTodoHandled={handlePromotedTodoHandled}
+              energySettings={energySettings}
             />
           </div>
         </div>

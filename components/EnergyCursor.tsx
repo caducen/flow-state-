@@ -1,26 +1,25 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-
-// Maximum energy (Grounded state) - used as the "full tank"
-const MAX_ENERGY = 18
+import { DEFAULT_ENERGY_SETTINGS } from '@/types'
 
 interface EnergyCursorProps {
   enabled: boolean
   selectedWeight: number
   energyBalance: number
+  maxEnergy?: number  // Customizable max energy (grounded value)
 }
 
 type CursorState = 'green' | 'cyan' | 'blue' | 'purple' | 'orange' | 'red'
 
-export function EnergyCursor({ enabled, selectedWeight, energyBalance }: EnergyCursorProps) {
+export function EnergyCursor({ enabled, selectedWeight, energyBalance, maxEnergy = DEFAULT_ENERGY_SETTINGS.grounded }: EnergyCursorProps) {
   const [position, setPosition] = useState({ x: -100, y: -100 })
   const [isVisible, setIsVisible] = useState(false)
   const [isTouchDevice, setIsTouchDevice] = useState(false)
 
   // Calculate REMAINING energy (fuel gauge style)
   const remaining = Math.max(energyBalance - selectedWeight, 0)
-  const remainingPercent = (remaining / MAX_ENERGY) * 100
+  const remainingPercent = (remaining / maxEnergy) * 100
   const isOverCapacity = selectedWeight > energyBalance
 
   // Determine cursor state based on remaining energy (fuel gauge with gradient)
