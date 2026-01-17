@@ -121,8 +121,8 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
       />
 
       {/* Modal */}
-      <div ref={modalRef} className="relative w-full max-w-lg animate-scale-in">
-        <div className="bg-surface-base border-subtle rounded-2xl shadow-2xl overflow-hidden">
+      <div ref={modalRef} className="relative w-full max-w-lg max-h-[90vh] animate-scale-in">
+        <div className="bg-surface-base border-subtle rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh]">
           {/* Ambient glow */}
           <div className="absolute -top-20 -left-20 w-40 h-40 bg-amber-glow/20 rounded-full blur-3xl" />
           <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-rose-accent/10 rounded-full blur-3xl" />
@@ -180,7 +180,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
             </div>
 
             {/* Priority & Due Date Row */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Priority */}
               <div>
                 <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
