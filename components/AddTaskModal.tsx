@@ -114,10 +114,10 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
       />
 
       {/* Modal - full screen on mobile, centered card on desktop */}
-      <div className="absolute inset-0 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-lg sm:max-h-[90vh]">
+      <div className="w-full h-full min-h-screen sm:min-h-0 sm:h-auto sm:absolute sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-lg sm:max-h-[90vh]">
         <div
           ref={modalRef}
-          className="h-full sm:h-auto sm:max-h-[90vh] bg-surface-base sm:border-subtle sm:rounded-2xl sm:shadow-2xl flex flex-col overflow-hidden"
+          className="w-full h-full min-h-screen sm:min-h-0 sm:h-auto sm:max-h-[90vh] bg-surface-base sm:border-subtle sm:rounded-2xl sm:shadow-2xl flex flex-col"
         >
           {/* Header */}
           <div className="flex-shrink-0 flex items-center justify-between p-5 border-b border-white/5 bg-surface-base sm:rounded-t-2xl">
