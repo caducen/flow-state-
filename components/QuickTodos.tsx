@@ -55,7 +55,7 @@ export function QuickTodos({ todos, setTodos, onPromote }: QuickTodosProps) {
   return (
     <div className="w-[280px] flex-shrink-0">
       {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="flex items-center gap-2 mb-1">
         <span className="w-2 h-2 rounded-full bg-cyan-400" />
         <h2 className="font-display text-base font-medium text-ink-rich">Quick Todos</h2>
 
@@ -82,15 +82,15 @@ export function QuickTodos({ todos, setTodos, onPromote }: QuickTodosProps) {
                 left: '20px'
               }}
             >
-              <p className="text-xs text-ink-rich font-medium mb-2">Todo vs Task</p>
+              <p className="text-xs text-ink-rich font-medium mb-2">Quick Todos vs Tasks</p>
               <p className="text-xs text-ink-muted leading-relaxed mb-2">
-                <span className="text-cyan-400 font-medium">Todo</span> = A lightweight reminder. Quick captures, short-term items, simple checklist entries like "Buy milk" or "Call Alex".
+                <span className="text-cyan-400 font-medium">Quick Todos</span> = Fast captures for small stuff. No energy cost - just check them off and go!
               </p>
               <p className="text-xs text-ink-muted leading-relaxed mb-2">
-                <span className="text-amber-glow font-medium">Task</span> = A unit of work with structure. Has priority, energy level, subtasks, notes, deadlines. Like "Prepare Q1 sales report".
+                <span className="text-amber-glow font-medium">Tasks</span> = Bigger work that takes energy. Has weight (2-6 points), priority, and structure. Use Today's Plan to budget your capacity.
               </p>
               <p className="text-xs text-ink-faint italic">
-                Use ↑ to promote a todo into a full task.
+                Tap ↑ to promote a todo into a full task when it grows.
               </p>
             </div>
           )}
@@ -103,6 +103,11 @@ export function QuickTodos({ todos, setTodos, onPromote }: QuickTodosProps) {
           </span>
         )}
       </div>
+
+      {/* Subtitle - clarifies no energy cost */}
+      <p className="text-[11px] text-ink-faint mb-3 ml-4">
+        No energy cost - just quick captures
+      </p>
 
       {/* Card */}
       <div className="bg-surface-base border-subtle rounded-2xl p-4 shadow-card">
