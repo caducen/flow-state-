@@ -209,15 +209,30 @@ export function QuickTodos({ todos, setTodos, onPromote }: QuickTodosProps) {
                   </button>
                 )}
 
-                {/* Delete */}
+                {/* Delete - always visible, fills on hover */}
                 <button
                   onClick={() => deleteTodo(todo.id)}
                   title="Delete todo"
-                  className="opacity-0 group-hover:opacity-100 text-ink-faint hover:text-rose-accent
-                    transition-all duration-150 p-1 -m-1"
+                  className="text-ink-faint/50 hover:text-rose-accent hover:scale-110
+                    transition-all duration-200 p-1 -m-1 group/delete"
                 >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                  <svg className="w-5 h-5" viewBox="0 0 24 24">
+                    {/* Outlined X - visible by default */}
+                    <path
+                      className="group-hover/delete:opacity-0 transition-opacity"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                    {/* Filled X - visible on hover */}
+                    <path
+                      className="opacity-0 group-hover/delete:opacity-100 transition-opacity"
+                      fill="currentColor"
+                      d="M6.293 6.293a1 1 0 0 1 1.414 0L12 10.586l4.293-4.293a1 1 0 1 1 1.414 1.414L13.414 12l4.293 4.293a1 1 0 0 1-1.414 1.414L12 13.414l-4.293 4.293a1 1 0 0 1-1.414-1.414L10.586 12 6.293 7.707a1 1 0 0 1 0-1.414z"
+                    />
                   </svg>
                 </button>
               </div>
