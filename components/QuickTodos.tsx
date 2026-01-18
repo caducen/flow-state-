@@ -180,16 +180,31 @@ export function QuickTodos({ todos, setTodos, onPromote }: QuickTodosProps) {
                   {todo.text}
                 </span>
 
-                {/* Promote to Task */}
+                {/* Promote to Task - always visible, fills on hover */}
                 {onPromote && !todo.completed && (
                   <button
                     onClick={() => handlePromote(todo)}
                     title="Promote to Task"
-                    className="opacity-0 group-hover:opacity-100 text-ink-faint hover:text-amber-glow
-                      transition-all duration-150 p-1 -m-1"
+                    className="text-ink-faint/50 hover:text-amber-glow hover:scale-110
+                      transition-all duration-200 p-1 -m-1 group/promote"
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                      {/* Outlined arrow - visible by default */}
+                      <path
+                        className="group-hover/promote:opacity-0 transition-opacity"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.5}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 19V5m0 0l-6 6m6-6l6 6"
+                      />
+                      {/* Filled arrow - visible on hover */}
+                      <path
+                        className="opacity-0 group-hover/promote:opacity-100 transition-opacity"
+                        fill="currentColor"
+                        d="M12 4a1 1 0 0 1 .707.293l6 6a1 1 0 0 1-1.414 1.414L13 7.414V19a1 1 0 1 1-2 0V7.414l-4.293 4.293a1 1 0 0 1-1.414-1.414l6-6A1 1 0 0 1 12 4z"
+                      />
                     </svg>
                   </button>
                 )}
