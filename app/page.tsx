@@ -196,7 +196,7 @@ export default function Home() {
             </div>
 
             {/* Instructions + Energy Cursor + Recalibrate + Theme Toggle + Settings */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {/* Info Button */}
               <button
                 onClick={() => setShowInstructions(!showInstructions)}

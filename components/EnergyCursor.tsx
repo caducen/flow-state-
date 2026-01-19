@@ -121,7 +121,21 @@ export function EnergyCursor({ enabled, selectedWeight, energyBalance, maxEnergy
         body.energy-cursor-enabled input,
         body.energy-cursor-enabled textarea,
         body.energy-cursor-enabled select,
+        body.energy-cursor-enabled label,
         body.energy-cursor-enabled [role="button"] {
+          cursor: none !important;
+        }
+        /* Range slider specific */
+        body.energy-cursor-enabled input[type="range"] {
+          cursor: none !important;
+        }
+        body.energy-cursor-enabled input[type="range"]::-webkit-slider-thumb {
+          cursor: none !important;
+        }
+        body.energy-cursor-enabled input[type="range"]::-moz-range-thumb {
+          cursor: none !important;
+        }
+        body.energy-cursor-enabled input[type="range"]::-ms-thumb {
           cursor: none !important;
         }
       `}</style>

@@ -38,7 +38,8 @@ export function WelcomeScreen({ onSelectState, energySettings = DEFAULT_ENERGY_S
       </div>
 
       {/* Scrollable content wrapper */}
-      <div className="relative z-10 min-h-full overflow-y-auto flex flex-col items-center justify-center py-8 px-4 md:py-12">
+      <div className="absolute inset-0 z-10 overflow-y-auto">
+        <div className="min-h-full flex flex-col items-center justify-center py-12 px-4 md:py-16">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -123,6 +124,7 @@ export function WelcomeScreen({ onSelectState, energySettings = DEFAULT_ENERGY_S
             Energy points can be customized in Settings
           </p>
         </motion.div>
+        </div>
       </div>
     </motion.div>
   )
