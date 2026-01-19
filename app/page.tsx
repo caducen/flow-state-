@@ -13,12 +13,17 @@ import { SettingsPanel } from '@/components/SettingsPanel'
 import { EnergyCursor } from '@/components/EnergyCursor'
 import { EnergyProgressBar } from '@/components/EnergyProgressBar'
 import { EnergyCustomizationModal } from '@/components/EnergyCustomizationModal'
+import { WelcomeScreen } from '@/components/WelcomeScreen'
+import { AmbientBackground } from '@/components/AmbientBackground'
+import { AnimatePresence } from 'framer-motion'
 
 export default function Home() {
   const [tasks, setTasks] = useLocalStorage<Task[]>('flow-tasks-v3', [])
   const [quickTodos, setQuickTodos] = useLocalStorage<QuickTodo[]>('flow-quick-todos', [])
   const [labels, setLabels] = useLocalStorage<Label[]>('flow-labels', DEFAULT_LABELS)
   const [userState, setUserState] = useLocalStorage<UserState | null>('flow-user-state', null)
+  const [lastCheckInDate, setLastCheckInDate] = useLocalStorage<string | null>('flow-last-checkin-date', null)
+  const [showWelcome, setShowWelcome] = useState(false)
   const [energyCursorEnabled, setEnergyCursorEnabled] = useLocalStorage<boolean>('energyCursorEnabled', false)
   const [hasSeenOnboarding, setHasSeenOnboarding, onboardingLoaded] = useLocalStorage<boolean>('flow-seen-onboarding', false)
   const [promotedTodo, setPromotedTodo] = useState<{ text: string; id: string } | null>(null)
@@ -31,6 +36,15 @@ export default function Home() {
     const interval = setInterval(() => setCurrentTime(new Date()), 60000)
     return () => clearInterval(interval)
   }, [])
+
+  // Check if user needs to see welcome screen (daily check-in)
+  useEffect(() => {
+    const today = new Date().toDateString()
+    // Show welcome if no check-in today or no state selected
+    if (lastCheckInDate !== today || !userState) {
+      setShowWelcome(true)
+    }
+  }, [lastCheckInDate, userState])
 
   // Migrate old tasks to new format (add progress field)
   useEffect(() => {
@@ -67,6 +81,18 @@ export default function Home() {
     setShowOnboardingModal(false)
   }, [setEnergySettings, setHasSeenOnboarding])
 
+  // Handle welcome screen state selection
+  const handleWelcomeStateSelect = useCallback((state: UserState) => {
+    setUserState(state)
+    setLastCheckInDate(new Date().toDateString())
+    setShowWelcome(false)
+  }, [setUserState, setLastCheckInDate])
+
+  // Handle recalibrate (show welcome screen again)
+  const handleRecalibrate = useCallback(() => {
+    setShowWelcome(true)
+  }, [])
+
   const handlePromoteTodo = useCallback((text: string, todoId: string) => {
     setPromotedTodo({ text, id: todoId })
     // Remove the todo after promoting
@@ -88,6 +114,19 @@ export default function Home() {
 
   return (
     <>
+      {/* Ambient Background - Drifting orbs */}
+      <AmbientBackground />
+
+      {/* Welcome Screen - Daily check-in ceremony */}
+      <AnimatePresence>
+        {showWelcome && (
+          <WelcomeScreen
+            onSelectState={handleWelcomeStateSelect}
+            energySettings={energySettings}
+          />
+        )}
+      </AnimatePresence>
+
       {/* First-time onboarding modal */}
       <EnergyCustomizationModal
         isOpen={showOnboardingModal}
@@ -127,7 +166,7 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Energy Cursor + Theme Toggle + Settings */}
+            {/* Energy Cursor + Recalibrate + Theme Toggle + Settings */}
             <div className="flex items-center gap-3">
               {/* Energy Cursor Checkbox */}
               <label className="flex items-center gap-1.5 cursor-pointer group">
@@ -144,6 +183,27 @@ export default function Home() {
                   Energy cursor
                 </span>
               </label>
+
+              {/* Recalibrate Button */}
+              <button
+                onClick={handleRecalibrate}
+                className="p-2 rounded-lg hover:bg-surface-raised transition-all group"
+                title="Recalibrate energy"
+              >
+                <svg
+                  className="w-4 h-4 text-ink-faint group-hover:text-ink-muted group-hover:rotate-180 transition-all duration-300"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              </button>
 
               <ThemeToggle />
               <SettingsPanel
@@ -197,8 +257,8 @@ export default function Home() {
 
         {/* Main Layout - Left-aligned, single column on mobile */}
         <div className="max-w-md space-y-6">
-          {/* Quick Todos */}
-          <div className="animate-slide-up" style={{ animationDelay: '0.15s', opacity: 0 }}>
+          {/* Quick Todos - higher z-index for tooltip visibility */}
+          <div className="animate-slide-up relative z-20" style={{ animationDelay: '0.15s', opacity: 0 }}>
             <QuickTodos
               todos={quickTodos}
               setTodos={setQuickTodos}
@@ -206,8 +266,8 @@ export default function Home() {
             />
           </div>
 
-          {/* Tasks */}
-          <div className="animate-slide-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
+          {/* Tasks - lower z-index */}
+          <div className="animate-slide-up relative z-10" style={{ animationDelay: '0.2s', opacity: 0 }}>
             <TaskList
               tasks={tasks}
               setTasks={setTasks}

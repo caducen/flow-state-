@@ -1,6 +1,25 @@
 import type { Metadata, Viewport } from 'next'
+import { DM_Sans, JetBrains_Mono, Fraunces } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+})
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+})
+
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  variable: '--font-serif',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Flow State',
@@ -19,7 +38,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen antialiased overflow-x-hidden">
+      <body className={`${dmSans.variable} ${jetbrainsMono.variable} ${fraunces.variable} min-h-screen antialiased overflow-x-hidden`}>
         <ThemeProvider>
           {children}
         </ThemeProvider>

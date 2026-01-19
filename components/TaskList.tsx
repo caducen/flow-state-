@@ -160,11 +160,15 @@ export function TaskList({
             <div
               key={task.id}
               className={`
-                bg-surface-base border rounded-xl p-3 cursor-pointer
+                task-card bg-surface-base border rounded-xl p-3 cursor-pointer
                 transition-all duration-200
+                ${task.isTodayTask ? 'task-today task-today-pulse' : ''}
+                ${selectedTaskId === task.id ? 'task-selected' : ''}
                 ${selectedTaskId === task.id
                   ? 'border-amber-glow/50 shadow-glow-sm'
-                  : 'border-subtle hover:border-ink-faint/30'
+                  : task.isTodayTask
+                    ? ''
+                    : 'border-subtle hover:border-ink-faint/30'
                 }
               `}
               onClick={() => setSelectedTaskId(selectedTaskId === task.id ? null : task.id)}
@@ -194,8 +198,8 @@ export function TaskList({
 
                   {/* Labels */}
                   {task.labelIds.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {task.labelIds.slice(0, 2).map(labelId => {
+                    <div className="task-metadata flex flex-wrap gap-1 mt-1">
+                      {task.labelIds.slice(0, 3).map(labelId => {
                         const label = labels.find(l => l.id === labelId)
                         if (!label) return null
                         return (
@@ -208,12 +212,17 @@ export function TaskList({
                           </span>
                         )
                       })}
+                      {task.labelIds.length > 3 && (
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-surface-overlay text-ink-faint">
+                          +{task.labelIds.length - 3}
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>
 
                 {/* Weight indicator with tooltip */}
-                <div className="relative flex items-center gap-1">
+                <div className="task-secondary relative flex items-center gap-1">
                   <button
                     onClick={(e) => {
                       e.stopPropagation()

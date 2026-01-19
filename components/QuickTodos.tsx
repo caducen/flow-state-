@@ -60,7 +60,7 @@ export function QuickTodos({ todos, setTodos, onPromote }: QuickTodosProps) {
         <h2 className="font-display text-base font-medium text-ink-rich">Quick Todos</h2>
 
         {/* Info icon with tooltip */}
-        <div className="relative" style={{ zIndex: showTooltip ? 99999 : 'auto' }}>
+        <div className="relative">
           <button
             onMouseEnter={() => setShowTooltip(true)}
             onMouseLeave={() => setShowTooltip(false)}
@@ -75,12 +75,8 @@ export function QuickTodos({ todos, setTodos, onPromote }: QuickTodosProps) {
           </button>
           {showTooltip && (
             <div
-              className="fixed w-72 p-3 bg-surface-overlay border border-white/10 rounded-xl shadow-2xl"
-              style={{
-                zIndex: 99999,
-                top: '120px',
-                left: '20px'
-              }}
+              className="absolute left-0 top-full mt-2 w-72 p-3 bg-surface-overlay border border-white/10 rounded-xl shadow-2xl"
+              style={{ zIndex: 99999 }}
             >
               <p className="text-xs text-ink-rich font-medium mb-2">Quick Todos vs Tasks</p>
               <p className="text-xs text-ink-muted leading-relaxed mb-2">

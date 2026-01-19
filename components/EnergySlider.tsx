@@ -145,7 +145,7 @@ export function EnergySlider({
       {/* Slider track */}
       <div
         ref={sliderRef}
-        className="relative h-3 bg-surface-overlay rounded-full cursor-pointer select-none"
+        className="slider-track cursor-pointer select-none"
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -153,22 +153,22 @@ export function EnergySlider({
       >
         {/* Fill */}
         <div
-          className="absolute inset-y-0 left-0 rounded-full transition-all duration-75"
+          className="slider-fill"
           style={{
             width: `${percentage}%`,
-            backgroundColor: color,
-            opacity: 0.8,
+            background: `linear-gradient(90deg, ${color}99 0%, ${color} 100%)`,
+            ['--slider-color' as string]: `${color}50`,
           }}
         />
 
         {/* Thumb */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full
-            bg-white shadow-md border-2 transition-transform duration-75
-            hover:scale-110"
+          className={`slider-thumb ${isDragging ? 'dragging' : ''}`}
           style={{
-            left: `calc(${percentage}% - 10px)`,
-            borderColor: color,
+            left: `calc(${percentage}% - 12px)`,
+            boxShadow: isDragging
+              ? `0 2px 8px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.7), 0 0 0 2px ${color}40`
+              : `0 4px 12px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.8), 0 0 0 2px ${color}30`,
           }}
         />
       </div>

@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=JetBrains+Mono:wght@400;500&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -69,7 +67,7 @@ body {
   max-width: 100vw;
   background-color: var(--surface-deep);
   color: var(--ink-rich);
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: var(--font-sans), 'DM Sans', system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -121,9 +119,474 @@ body::after {
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: var(--font-serif), 'Fraunces', Georgia, serif;
   font-weight: 500;
   letter-spacing: -0.02em;
+}
+
+/* Typography System Utilities */
+.font-serif {
+  font-family: var(--font-serif), 'Fraunces', Georgia, serif;
+}
+
+.font-mono {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+}
+
+/* Dramatic headline style for welcome/ceremony moments */
+.text-dramatic {
+  font-family: var(--font-serif), 'Fraunces', Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/* Data/numbers style */
+.text-data {
+  font-family: var(--font-mono), 'JetBrains Mono', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===================================
+   GLASSMORPHISM DEPTH SYSTEM
+   =================================== */
+
+/* Level 1: Full panels (Check-in cards, main sections) - MOST depth */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.08),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.glass-panel:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Level 2: Cards within panels (Task cards) - MEDIUM depth */
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 6px 20px rgba(0, 0, 0, 0.25),
+    inset 0 1px 1px rgba(255, 255, 255, 0.04);
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.06);
+  transform: translateY(-2px);
+}
+
+/* Level 3: Subtle elements (Badges, labels) - LEAST depth */
+.glass-subtle {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Light mode adaptations */
+:root .glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+:root .glass-panel:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+}
+
+:root .glass-card {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+:root .glass-card:hover {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+:root .glass-subtle {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode overrides */
+.dark .glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+}
+
+.dark .glass-panel:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08);
+}
+
+.dark .glass-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.dark .glass-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.dark .glass-subtle {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===================================
+   3D SLIDER SYSTEM
+   =================================== */
+
+/* Slider track (the rail) - INSET appearance */
+.slider-track {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  background:
+    linear-gradient(180deg,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(0, 0, 0, 0.3) 40%,
+      rgba(255, 255, 255, 0.08) 100%
+    );
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.5),
+    inset 0 -2px 4px rgba(255, 255, 255, 0.08),
+    0 1px 3px rgba(255, 255, 255, 0.1);
+  overflow: visible;
+}
+
+/* Light mode track */
+:root .slider-track {
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.05) 40%,
+    rgba(255, 255, 255, 0.9) 100%
+  );
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.15),
+    inset 0 -2px 4px rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.dark .slider-track {
+  background:
+    linear-gradient(180deg,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(0, 0, 0, 0.3) 40%,
+      rgba(255, 255, 255, 0.08) 100%
+    );
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 3px 6px rgba(0, 0, 0, 0.5),
+    inset 0 -2px 4px rgba(255, 255, 255, 0.08),
+    0 1px 3px rgba(255, 255, 255, 0.1);
+}
+
+/* Slider thumb (the draggable handle) - RAISED appearance */
+.slider-thumb {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  background:
+    linear-gradient(135deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.85) 50%,
+      rgba(230, 230, 230, 0.9) 100%
+    );
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: grab;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Gloss effect on thumb - MORE visible */
+.slider-thumb::before {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  height: 55%;
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.2) 60%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Hover state - MORE elevation */
+.slider-thumb:hover {
+  cursor: grab;
+  transform: translateY(-50%) scale(1.15) translateY(-2px);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.6),
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    inset 0 2px 4px rgba(255, 255, 255, 1),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Active/dragging state - PRESSED DOWN */
+.slider-thumb:active,
+.slider-thumb.dragging {
+  cursor: grabbing;
+  transform: translateY(-50%) scale(1.08) translateY(2px);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.7),
+    0 1px 4px rgba(0, 0, 0, 0.5),
+    inset 0 2px 4px rgba(255, 255, 255, 0.7),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Filled portion of track (progress) */
+.slider-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 12px;
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    0 0 8px var(--slider-color, rgba(245, 158, 11, 0.3));
+  transition: width 0.1s ease;
+}
+
+/* ===================================
+   TODAY'S FOCUS - GOLDEN BORDERS
+   =================================== */
+
+/* Today's task indicator */
+.task-today {
+  position: relative;
+  border-left: 4px solid var(--amber-glow) !important;
+  border-left-color: var(--amber-glow) !important;
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.1) 0%, transparent 60%) !important;
+}
+
+.task-today:hover {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, transparent 60%) !important;
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.2),
+    -4px 0 16px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Subtle pulse animation for today's tasks */
+@keyframes pulse-golden {
+  0%, 100% {
+    border-left-color: #f59e0b;
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.15),
+      -4px 0 8px rgba(245, 158, 11, 0.1);
+  }
+  50% {
+    border-left-color: #fbbf24;
+    box-shadow:
+      0 6px 24px rgba(0, 0, 0, 0.2),
+      -4px 0 16px rgba(245, 158, 11, 0.3);
+  }
+}
+
+.task-today-pulse {
+  animation: pulse-golden 3s ease-in-out infinite;
+}
+
+/* Light mode adjustments */
+:root .task-today {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.12) 0%, transparent 60%) !important;
+}
+
+:root .task-today:hover {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.18) 0%, transparent 60%) !important;
+}
+
+/* ===================================
+   PROGRESSIVE DISCLOSURE SYSTEM
+   =================================== */
+
+/* Task card base state - slightly dimmed */
+.task-card {
+  opacity: 0.75;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.task-card:hover {
+  opacity: 1;
+  transform: translateY(-3px) scale(1.01);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.25),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Task metadata (labels, dates) - more dimmed */
+.task-metadata {
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.task-card:hover .task-metadata {
+  opacity: 1;
+}
+
+/* Secondary info (weight, energy) - subtle until hover */
+.task-secondary {
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+.task-card:hover .task-secondary {
+  opacity: 0.8;
+}
+
+/* Exception: Today's tasks are always fully visible */
+.task-card.task-today {
+  opacity: 1;
+}
+
+.task-card.task-today .task-metadata {
+  opacity: 0.7;
+}
+
+.task-card.task-today:hover .task-metadata {
+  opacity: 1;
+}
+
+.task-card.task-today .task-secondary {
+  opacity: 0.6;
+}
+
+/* Exception: Selected/expanded tasks are fully visible */
+.task-card.task-selected {
+  opacity: 1;
+}
+
+.task-card.task-selected .task-metadata,
+.task-card.task-selected .task-secondary {
+  opacity: 1;
+}
+
+/* ===================================
+   AMBIENT BACKGROUND ANIMATIONS
+   =================================== */
+
+@keyframes drift-slow {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(30px, -20px) scale(1.05);
+  }
+  50% {
+    transform: translate(10px, 20px) scale(0.98);
+  }
+  75% {
+    transform: translate(-20px, 10px) scale(1.02);
+  }
+}
+
+@keyframes drift-slower {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(-25px, 30px) scale(1.08);
+  }
+  66% {
+    transform: translate(20px, -15px) scale(0.95);
+  }
+}
+
+@keyframes drift-slowest {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(15px, 20px) scale(1.1);
+  }
+}
+
+.animate-drift-slow {
+  animation: drift-slow 25s ease-in-out infinite;
+}
+
+.animate-drift-slower {
+  animation: drift-slower 35s ease-in-out infinite;
+}
+
+.animate-drift-slowest {
+  animation: drift-slowest 45s ease-in-out infinite;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .animate-drift-slow,
+  .animate-drift-slower,
+  .animate-drift-slowest {
+    animation: none;
+  }
+}
+
+/* ===================================
+   TOOLTIP SYSTEM
+   =================================== */
+
+/* Ensure tooltips always appear above content */
+.tooltip,
+[data-tooltip] {
+  z-index: 99999 !important;
+}
+
+/* Prevent task cards from creating problematic stacking contexts */
+.task-card {
+  isolation: auto;
 }
 
 /* Form elements */
