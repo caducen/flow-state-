@@ -43,7 +43,6 @@ export default function Home() {
   const { settings: energySettings, setSettings: setEnergySettings, resetToDefaults: resetEnergySettings } = useEnergySettings()
   const [currentTime, setCurrentTime] = useState(new Date())
   const [showInstructions, setShowInstructions] = useState(false)
-  const [instructionsHovered, setInstructionsHovered] = useState(false)
 
   // Update time every minute for real-time accuracy
   useEffect(() => {
@@ -198,31 +197,27 @@ export default function Home() {
 
             {/* Instructions + Energy Cursor + Recalibrate + Theme Toggle + Settings */}
             <div className="flex items-center gap-3">
-              {/* Instructions Button */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowInstructions(!showInstructions)}
-                  onMouseEnter={() => setInstructionsHovered(true)}
-                  onMouseLeave={() => setInstructionsHovered(false)}
-                  className={`p-2 rounded-lg transition-all group ${
-                    showInstructions
-                      ? 'bg-amber-glow/20 text-amber-glow'
-                      : 'hover:bg-surface-raised text-ink-faint hover:text-ink-muted'
-                  }`}
-                  title="Instructions"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </button>
-
-                {/* Hover tooltip (only when not pinned) */}
-                {instructionsHovered && !showInstructions && (
-                  <div className="absolute right-0 top-full mt-2 w-48 p-2 bg-surface-overlay border border-white/10 rounded-lg shadow-xl z-50">
-                    <p className="text-xs text-ink-muted">Click to show setup instructions</p>
-                  </div>
-                )}
-              </div>
+              {/* Info Button */}
+              <button
+                onClick={() => setShowInstructions(!showInstructions)}
+                className={`
+                  h-10 px-3 rounded-xl
+                  flex items-center justify-center gap-1.5
+                  border border-subtle
+                  transition-all duration-200
+                  hover:scale-105
+                  ${showInstructions
+                    ? 'bg-amber-glow/20 border-amber-glow/40 text-amber-glow'
+                    : 'bg-surface-raised hover:bg-surface-overlay text-ink-muted'
+                  }
+                `}
+                title="Show setup instructions"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-xs font-medium">Info</span>
+              </button>
 
               {/* Energy Cursor Checkbox */}
               <label className="flex items-center gap-1.5 cursor-pointer group">
