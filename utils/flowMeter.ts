@@ -224,6 +224,87 @@ export function getFlowMeterPercentage(userState: UserState | null, capacityPerc
 }
 
 /**
+ * Time-Based Check-In Intelligence
+ *
+ * Active day window: 7am to midnight (17 hours)
+ * Energy points scale based on hours remaining in the day
+ */
+
+export interface TimeAdjustedEnergy {
+  basePoints: number
+  adjustedPoints: number
+  hoursRemaining: number
+  checkInTime: Date
+  isEarlyBird: boolean // Before 7am
+}
+
+/**
+ * Calculate time-adjusted energy points based on hours remaining in day
+ * @param basePoints - The base energy points for the selected state
+ * @param checkInTime - The time of check-in (defaults to now)
+ * @returns Adjusted points (minimum 1)
+ */
+export function getTimeAdjustedPoints(basePoints: number, checkInTime: Date = new Date()): number {
+  const hour = checkInTime.getHours()
+  const minute = checkInTime.getMinutes()
+
+  // Before 7am: full points (early bird bonus)
+  if (hour < 7) return basePoints
+
+  // Calculate hours from 7am
+  const hoursFrom7am = (hour - 7) + (minute / 60)
+  const totalActiveHours = 17 // 7am to midnight
+  const hoursRemaining = Math.max(0, totalActiveHours - hoursFrom7am)
+
+  // Scale points based on remaining hours
+  const adjustedPoints = basePoints * (hoursRemaining / totalActiveHours)
+
+  // Minimum 1 point (never zero)
+  return Math.max(1, Math.round(adjustedPoints))
+}
+
+/**
+ * Get detailed time information for UI display
+ * @param basePoints - The base energy points for the selected state
+ * @param checkInTime - The time of check-in (defaults to now)
+ */
+export function getTimeInfo(basePoints: number, checkInTime: Date = new Date()): TimeAdjustedEnergy {
+  const hour = checkInTime.getHours()
+  const minute = checkInTime.getMinutes()
+  const isEarlyBird = hour < 7
+
+  let hoursRemaining: number
+
+  if (isEarlyBird) {
+    // Before 7am: treat as full day ahead
+    hoursRemaining = 17
+  } else {
+    // Calculate hours remaining from current time to midnight
+    const hoursFrom7am = (hour - 7) + (minute / 60)
+    hoursRemaining = Math.max(0, 17 - hoursFrom7am)
+  }
+
+  return {
+    basePoints,
+    adjustedPoints: getTimeAdjustedPoints(basePoints, checkInTime),
+    hoursRemaining: Math.round(hoursRemaining * 10) / 10, // Round to 1 decimal
+    checkInTime,
+    isEarlyBird,
+  }
+}
+
+/**
+ * Format time for display (e.g., "2:30pm")
+ */
+export function formatCheckInTime(date: Date = new Date()): string {
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).toLowerCase()
+}
+
+/**
  * Get weight category display info
  */
 export const WEIGHT_CATEGORY_CONFIG: Record<WeightCategory, { label: string; color: string; description: string }> = {

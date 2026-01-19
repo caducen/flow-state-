@@ -132,12 +132,12 @@ export function TaskList({
       <div className="flex items-center gap-3 mb-4">
         <span className="w-2 h-2 rounded-full bg-amber-glow" />
         <h2 className="font-display text-base font-medium text-ink-rich">Tasks</h2>
-        <span className="text-xs text-ink-faint font-mono">
+        <span className="text-sm text-ink-faint font-mono">
           {activeTasks.length}
         </span>
         <button
           onClick={handleAddTask}
-          className="ml-auto px-2.5 py-1 text-xs text-ink-muted hover:text-amber-glow
+          className="ml-auto px-2.5 py-1 text-sm text-ink-muted hover:text-amber-glow
             bg-surface-raised hover:bg-surface-overlay
             border border-subtle hover:border-amber-glow/30
             rounded-lg transition-all duration-200
@@ -152,8 +152,8 @@ export function TaskList({
       <div className="space-y-2">
         {activeTasks.length === 0 ? (
           <div className="bg-surface-base border-subtle rounded-2xl p-8 text-center">
-            <p className="text-sm text-ink-faint">No tasks yet</p>
-            <p className="text-xs text-ink-faint/60 mt-1">Add one to get started</p>
+            <p className="text-base text-ink-faint">No tasks yet</p>
+            <p className="text-sm text-ink-faint/60 mt-1">Add one to get started</p>
           </div>
         ) : (
           activeTasks.map(task => (
@@ -190,7 +190,7 @@ export function TaskList({
                 </button>
 
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-medium text-ink-rich truncate">{task.title}</h3>
+                  <h3 className="text-base font-medium text-ink-rich truncate">{task.title}</h3>
 
                   {/* Labels */}
                   {task.labelIds.length > 0 && (
@@ -201,7 +201,7 @@ export function TaskList({
                         return (
                           <span
                             key={label.id}
-                            className="text-[10px] px-1.5 py-0.5 rounded"
+                            className="text-xs px-1.5 py-0.5 rounded"
                             style={{ backgroundColor: `${label.color}20`, color: label.color }}
                           >
                             {label.name}
@@ -227,7 +227,7 @@ export function TaskList({
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </button>
-                  <span className="text-xs text-ink-faint font-mono">
+                  <span className="text-sm text-ink-faint font-mono">
                     {getTaskWeight(task, energySettings)}/{getBaseTaskWeight(task, energySettings)}
                   </span>
 
@@ -270,7 +270,7 @@ export function TaskList({
                 <div className="mt-3 pt-3 border-t border-subtle animate-fade-in">
                   {/* Description */}
                   {task.description && (
-                    <p className="text-xs text-ink-muted mb-3 leading-relaxed">
+                    <p className="text-sm text-ink-muted mb-3 leading-relaxed">
                       {task.description}
                     </p>
                   )}
@@ -278,7 +278,7 @@ export function TaskList({
                   {/* Meta info */}
                   <div className="flex items-center gap-2 flex-wrap mb-3">
                     <span
-                      className="text-[10px] font-medium px-1.5 py-0.5 rounded"
+                      className="text-xs font-medium px-1.5 py-0.5 rounded"
                       style={{
                         backgroundColor: PRIORITY_CONFIG[task.priority].bgColor,
                         color: PRIORITY_CONFIG[task.priority].color,
@@ -288,7 +288,7 @@ export function TaskList({
                     </span>
                     {task.energyLevel && (
                       <span
-                        className="text-[10px] font-medium px-1.5 py-0.5 rounded"
+                        className="text-xs font-medium px-1.5 py-0.5 rounded"
                         style={{
                           backgroundColor: ENERGY_CONFIG[task.energyLevel].bgColor,
                           color: ENERGY_CONFIG[task.energyLevel].color,
@@ -298,7 +298,7 @@ export function TaskList({
                       </span>
                     )}
                     {task.dueDate && (
-                      <span className="text-[10px] text-ink-faint flex items-center gap-1">
+                      <span className="text-xs text-ink-faint flex items-center gap-1">
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
@@ -310,12 +310,12 @@ export function TaskList({
                   {/* Subtasks */}
                   {task.subtasks && task.subtasks.length > 0 && (
                     <div className="mb-3">
-                      <div className="text-[10px] text-ink-faint uppercase tracking-wider mb-1">
+                      <div className="text-xs text-ink-faint uppercase tracking-wider mb-1">
                         Subtasks ({task.subtasks.filter(s => s.completed).length}/{task.subtasks.length})
                       </div>
                       <div className="space-y-1">
                         {task.subtasks.map(subtask => (
-                          <div key={subtask.id} className="flex items-center gap-2 text-xs">
+                          <div key={subtask.id} className="flex items-center gap-2 text-sm">
                             <span className={subtask.completed ? 'text-emerald-400' : 'text-ink-faint'}>
                               {subtask.completed ? '✓' : '○'}
                             </span>
@@ -330,7 +330,7 @@ export function TaskList({
 
                   {/* Progress Buttons */}
                   <div className="mb-3">
-                    <div className="text-[10px] text-ink-faint uppercase tracking-wider mb-2">Progress</div>
+                    <div className="text-xs text-ink-faint uppercase tracking-wider mb-2">Progress</div>
                     <div className="flex gap-1">
                       {[0, 25, 50, 75, 100].map(value => (
                         <button
@@ -340,7 +340,7 @@ export function TaskList({
                             handleProgressChange(task.id, value)
                           }}
                           className={`
-                            flex-1 py-1.5 text-xs font-medium rounded-lg transition-all
+                            flex-1 py-1.5 text-sm font-medium rounded-lg transition-all
                             ${task.progress === value
                               ? 'text-white'
                               : 'text-ink-muted hover:text-ink-rich bg-surface-raised hover:bg-surface-overlay'
@@ -363,7 +363,7 @@ export function TaskList({
                         e.stopPropagation()
                         handleEditTask(task)
                       }}
-                      className="flex-1 py-2 text-xs text-ink-muted hover:text-ink-rich
+                      className="flex-1 py-2 text-sm text-ink-muted hover:text-ink-rich
                         bg-surface-raised hover:bg-surface-overlay rounded-lg transition-colors"
                     >
                       Edit
@@ -373,7 +373,7 @@ export function TaskList({
                         e.stopPropagation()
                         handleArchiveTask(task.id)
                       }}
-                      className="flex-1 py-2 text-xs text-emerald-400 hover:text-emerald-300
+                      className="flex-1 py-2 text-sm text-emerald-400 hover:text-emerald-300
                         bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg transition-colors"
                     >
                       ✓ Complete
@@ -383,7 +383,7 @@ export function TaskList({
                         e.stopPropagation()
                         setTaskToDelete(task)
                       }}
-                      className="py-2 px-3 text-xs text-rose-400 hover:text-rose-300
+                      className="py-2 px-3 text-sm text-rose-400 hover:text-rose-300
                         bg-rose-500/10 hover:bg-rose-500/20 rounded-lg transition-colors"
                     >
                       ✕
@@ -401,7 +401,7 @@ export function TaskList({
         <div className="mt-6">
           <button
             onClick={() => setShowArchive(!showArchive)}
-            className="flex items-center gap-2 text-xs text-ink-faint hover:text-ink-muted transition-colors"
+            className="flex items-center gap-2 text-sm text-ink-faint hover:text-ink-muted transition-colors"
           >
             <svg
               className={`w-3 h-3 transition-transform ${showArchive ? 'rotate-90' : ''}`}
@@ -423,8 +423,8 @@ export function TaskList({
                     bg-surface-base/50 hover:bg-surface-base transition-colors cursor-pointer"
                   onClick={() => setSelectedTaskId(selectedTaskId === task.id ? null : task.id)}
                 >
-                  <span className="text-emerald-400 text-xs">✓</span>
-                  <span className="text-sm text-ink-faint line-through flex-1 truncate">
+                  <span className="text-emerald-400 text-sm">✓</span>
+                  <span className="text-base text-ink-faint line-through flex-1 truncate">
                     {task.title}
                   </span>
                   <button
@@ -432,7 +432,7 @@ export function TaskList({
                       e.stopPropagation()
                       handleRestoreTask(task.id)
                     }}
-                    className="opacity-0 group-hover:opacity-100 text-xs text-ink-faint hover:text-ink-muted transition-all"
+                    className="opacity-0 group-hover:opacity-100 text-sm text-ink-faint hover:text-ink-muted transition-all"
                   >
                     Restore
                   </button>
@@ -441,10 +441,10 @@ export function TaskList({
                   {selectedTaskId === task.id && (
                     <div className="absolute left-0 right-0 mt-2 p-3 bg-surface-overlay rounded-lg shadow-lg border border-subtle z-10">
                       {task.description && (
-                        <p className="text-xs text-ink-muted mb-2">{task.description}</p>
+                        <p className="text-sm text-ink-muted mb-2">{task.description}</p>
                       )}
                       {task.completedAt && (
-                        <p className="text-[10px] text-ink-faint">
+                        <p className="text-xs text-ink-faint">
                           Completed {new Date(task.completedAt).toLocaleDateString()}
                         </p>
                       )}

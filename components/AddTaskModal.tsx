@@ -141,7 +141,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
       >
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between p-5 border-b border-white/5 bg-surface-base sm:rounded-t-2xl">
-              <h2 id="modal-title" className="font-display text-xl font-medium text-ink-rich">
+              <h2 id="modal-title" className="font-display text-2xl font-medium text-ink-rich">
                 {isEditing ? 'Edit Task' : 'New Task'}
               </h2>
               <button
@@ -159,7 +159,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
             <form onSubmit={handleSubmit} className="p-5 space-y-5">
               {/* Title */}
               <div>
-                <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                <label className="block text-sm font-medium text-ink-muted uppercase tracking-wider mb-2">
                   Title
                 </label>
                 <input
@@ -177,7 +177,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
 
               {/* Description */}
               <div>
-                <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                <label className="block text-sm font-medium text-ink-muted uppercase tracking-wider mb-2">
                   Description
                   <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
                 </label>
@@ -195,7 +195,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
 
               {/* Priority */}
               <div>
-                <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                <label className="block text-sm font-medium text-ink-muted uppercase tracking-wider mb-2">
                   Priority
                 </label>
                 <div className="flex gap-2">
@@ -205,7 +205,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
                       type="button"
                       onClick={() => setPriority(p)}
                       className={`
-                        flex-1 px-3 py-2 text-xs font-medium rounded-lg
+                        flex-1 px-3 py-2 text-sm font-medium rounded-lg
                         border transition-all duration-200
                         ${priority === p
                           ? 'border-transparent'
@@ -225,7 +225,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
 
               {/* Due Date */}
               <div>
-                <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                <label className="block text-sm font-medium text-ink-muted uppercase tracking-wider mb-2">
                   Due Date
                   <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
                 </label>
@@ -243,7 +243,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
 
               {/* Energy Level */}
               <div>
-                <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                <label className="block text-sm font-medium text-ink-muted uppercase tracking-wider mb-2">
                   Energy Required
                   <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
                 </label>
@@ -254,7 +254,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
                       type="button"
                       onClick={() => setEnergyLevel(energyLevel === e ? undefined : e)}
                       className={`
-                        flex-1 px-3 py-2 text-xs font-medium rounded-lg
+                        flex-1 px-3 py-2 text-sm font-medium rounded-lg
                         border transition-all duration-200
                         ${energyLevel === e
                           ? 'border-transparent'
@@ -299,11 +299,11 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
                       >
                         {weightConfig.label} Task
                       </span>
-                      <span className="text-xs text-ink-faint">
+                      <span className="text-sm text-ink-faint">
                         ({taskWeight} pts)
                       </span>
                     </div>
-                    <p className="text-xs text-ink-muted mt-0.5">
+                    <p className="text-sm text-ink-muted mt-0.5">
                       {weightConfig.description}
                     </p>
                   </div>
@@ -312,7 +312,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
 
               {/* Labels */}
               <div>
-                <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                <label className="block text-sm font-medium text-ink-muted uppercase tracking-wider mb-2">
                   Labels
                   <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
                 </label>
@@ -323,7 +323,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
                       type="button"
                       onClick={() => toggleLabel(label.id)}
                       className={`
-                        text-xs font-medium px-3 py-1.5 rounded-full
+                        text-sm font-medium px-3 py-1.5 rounded-full
                         border transition-all duration-200
                         ${selectedLabels.includes(label.id)
                           ? 'border-transparent'
@@ -343,7 +343,7 @@ export function AddTaskModal({ labels, task, initialTitle, onClose, onSubmit }: 
 
               {/* Subtasks */}
               <div>
-                <label className="block text-xs font-medium text-ink-muted uppercase tracking-wider mb-2">
+                <label className="block text-sm font-medium text-ink-muted uppercase tracking-wider mb-2">
                   Subtasks
                   <span className="text-ink-faint font-normal normal-case ml-1">(optional)</span>
                 </label>

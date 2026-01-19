@@ -140,7 +140,7 @@ export function EnergyCursor({ enabled, selectedWeight, energyBalance, maxEnergy
           backgroundRepeat: 'no-repeat',
           transform: 'translate(-4px, -4px)', // Offset to align cursor tip
           pointerEvents: 'none',
-          zIndex: 9999,
+          zIndex: 100000,
           opacity: isVisible ? 1 : 0,
           transition: 'opacity 200ms ease',
           filter: `drop-shadow(0 0 6px ${getGlowColor()})`,

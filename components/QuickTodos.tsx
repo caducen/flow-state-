@@ -98,14 +98,14 @@ export function QuickTodos({ todos, setTodos, onPromote }: QuickTodosProps) {
 
         {/* Pending count badge */}
         {pendingCount > 0 && (
-          <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-cyan-400/10 text-cyan-400 ml-auto">
+          <span className="text-sm font-mono px-2 py-0.5 rounded-full bg-cyan-400/10 text-cyan-400 ml-auto">
             {pendingCount}
           </span>
         )}
       </div>
 
       {/* Subtitle - clarifies no energy cost */}
-      <p className="text-[11px] text-ink-faint mb-3 ml-4">
+      <p className="text-xs text-ink-faint mb-3 ml-4">
         No energy cost - just quick captures
       </p>
 
@@ -139,8 +139,8 @@ export function QuickTodos({ todos, setTodos, onPromote }: QuickTodosProps) {
         <div className="space-y-1 max-h-[360px] overflow-y-auto">
           {todos.length === 0 ? (
             <div className="py-8 text-center">
-              <p className="text-xs text-ink-faint italic">No todos yet</p>
-              <p className="text-xs text-ink-faint/60 mt-1">Add one above</p>
+              <p className="text-sm text-ink-faint italic">No todos yet</p>
+              <p className="text-sm text-ink-faint/60 mt-1">Add one above</p>
             </div>
           ) : (
             todos.map((todo, index) => (
@@ -173,7 +173,7 @@ export function QuickTodos({ todos, setTodos, onPromote }: QuickTodosProps) {
                 {/* Text */}
                 <span
                   className={`
-                    text-sm flex-1 truncate transition-all duration-200
+                    text-base flex-1 truncate transition-all duration-200
                     ${todo.completed ? 'text-ink-faint line-through' : 'text-ink-rich'}
                   `}
                 >

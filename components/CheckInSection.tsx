@@ -1,7 +1,8 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { Task, UserState, USER_STATE_CONFIG, EnergySettings, DEFAULT_ENERGY_SETTINGS } from '@/types'
-import { getSelectedWeight, getEnergyBalance, getEnergyZone, getEnergyZoneColor } from '@/utils/flowMeter'
+import { getSelectedWeight, getEnergyBalance, getEnergyZone, getEnergyZoneColor, getTimeInfo, formatCheckInTime } from '@/utils/flowMeter'
 
 interface CheckInSectionProps {
   userState: UserState | null
@@ -11,7 +12,21 @@ interface CheckInSectionProps {
 }
 
 export function CheckInSection({ userState, setUserState, tasks, energySettings = DEFAULT_ENERGY_SETTINGS }: CheckInSectionProps) {
-  const energyBalance = getEnergyBalance(userState, energySettings)
+  const [currentTime, setCurrentTime] = useState(new Date())
+
+  // Update time every minute for real-time accuracy
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(new Date()), 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Get base energy balance for the selected state
+  const baseEnergyBalance = getEnergyBalance(userState, energySettings)
+
+  // Calculate time-adjusted energy
+  const timeInfo = userState ? getTimeInfo(baseEnergyBalance, currentTime) : null
+  const energyBalance = timeInfo?.adjustedPoints ?? baseEnergyBalance
+
   const selectedWeight = getSelectedWeight(tasks, energySettings)
   const todayTaskCount = tasks.filter(t => t.isTodayTask).length
 
@@ -52,15 +67,15 @@ export function CheckInSection({ userState, setUserState, tasks, energySettings 
                 >
                   {config.label}
                 </span>
-                {isSelected && (
+                {isSelected && timeInfo && (
                   <span
-                    className="ml-1 text-xs font-mono px-1.5 py-0.5 rounded"
+                    className="ml-1 text-sm font-mono px-1.5 py-0.5 rounded"
                     style={{
                       backgroundColor: `${config.color}20`,
                       color: config.color,
                     }}
                   >
-                    {energySettings[state]}pts
+                    {timeInfo.adjustedPoints}pts
                   </span>
                 )}
               </div>
@@ -68,7 +83,7 @@ export function CheckInSection({ userState, setUserState, tasks, energySettings 
               {/* Description tooltip on hover - 2 o'clock position */}
               <div className="
                 absolute left-3/4 bottom-full mb-2 -translate-x-1/4 px-3 py-1.5
-                bg-surface-overlay text-ink-muted text-xs rounded-lg shadow-lg
+                bg-surface-overlay text-ink-muted text-sm rounded-lg shadow-lg
                 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity
                 pointer-events-none z-10
               ">
@@ -80,61 +95,94 @@ export function CheckInSection({ userState, setUserState, tasks, energySettings 
       </div>
 
       {/* Energy Display */}
-      {userState && (
-        <div className="flex items-center gap-4 animate-fade-in">
-          <div className="flex items-center gap-3 px-4 py-3 bg-surface-raised rounded-xl flex-wrap">
-            {/* Starting Energy (state's balance) */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-ink-muted text-sm">Starting:</span>
-              <span
-                className="font-mono font-semibold"
-                style={{ color: USER_STATE_CONFIG[userState].color }}
-              >
-                {energyBalance}
-              </span>
-            </div>
-
-            {/* Divider */}
-            <div className="w-px h-5 bg-border-subtle" />
-
-            {/* Used Energy */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-ink-muted text-sm">Used:</span>
-              <span className="font-mono font-semibold text-ink-base">
-                {selectedWeight}
-              </span>
-            </div>
-
-            {/* Divider */}
-            <div className="w-px h-5 bg-border-subtle" />
-
-            {/* Remaining Energy - uses gradient color */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-ink-muted text-sm">Remaining:</span>
-              <span
-                className="font-mono font-semibold"
-                style={{ color: getEnergyZoneColor(getEnergyZone(selectedWeight, energyBalance, energySettings)) }}
-              >
-                {Math.max(energyBalance - selectedWeight, 0)}
-              </span>
-            </div>
-
-            {/* Divider */}
-            <div className="w-px h-5 bg-border-subtle" />
-
-            {/* Today's tasks count */}
-            <div className="text-sm text-ink-muted">
-              {todayTaskCount} task{todayTaskCount !== 1 ? 's' : ''} selected
+      {userState && timeInfo && (
+        <div className="space-y-3 animate-fade-in max-w-md">
+          {/* Time-based info banner */}
+          <div className="px-4 py-2.5 bg-surface-base rounded-xl border border-subtle">
+            <div className="flex items-center gap-2 text-sm flex-wrap">
+              <span className="text-ink-faint">Checked in at</span>
+              <span className="font-mono text-ink-muted">{formatCheckInTime(currentTime)}</span>
+              <span className="text-ink-faint">·</span>
+              {timeInfo.isEarlyBird ? (
+                <span className="text-emerald-400">Early bird! Full energy available</span>
+              ) : (
+                <>
+                  <span className="text-ink-faint">
+                    {timeInfo.hoursRemaining}h remaining
+                  </span>
+                  {timeInfo.adjustedPoints < timeInfo.basePoints && (
+                    <>
+                      <span className="text-ink-faint">·</span>
+                      <span className="text-ink-muted">
+                        <span className="line-through text-ink-faint">{timeInfo.basePoints}</span>
+                        {' → '}
+                        <span className="font-semibold" style={{ color: USER_STATE_CONFIG[userState].color }}>
+                          {timeInfo.adjustedPoints}pts
+                        </span>
+                      </span>
+                    </>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
-          {/* Clear hint */}
-          <button
-            onClick={() => setUserState(null)}
-            className="text-xs text-ink-faint hover:text-ink-muted transition-colors"
-          >
-            clear
-          </button>
+          {/* Energy stats row */}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 px-4 py-3 bg-surface-raised rounded-xl flex-wrap">
+              {/* Starting Energy (time-adjusted) */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-ink-muted text-base">Starting:</span>
+                <span
+                  className="font-mono font-semibold"
+                  style={{ color: USER_STATE_CONFIG[userState].color }}
+                >
+                  {energyBalance}
+                </span>
+              </div>
+
+              {/* Divider */}
+              <div className="w-px h-5 bg-border-subtle" />
+
+              {/* Used Energy */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-ink-muted text-base">Used:</span>
+                <span className="font-mono font-semibold text-ink-base">
+                  {selectedWeight}
+                </span>
+              </div>
+
+              {/* Divider */}
+              <div className="w-px h-5 bg-border-subtle" />
+
+              {/* Remaining Energy - uses gradient color */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-ink-muted text-base">Remaining:</span>
+                <span
+                  className="font-mono font-semibold"
+                  style={{ color: getEnergyZoneColor(getEnergyZone(selectedWeight, energyBalance, energySettings)) }}
+                >
+                  {Math.max(energyBalance - selectedWeight, 0)}
+                </span>
+              </div>
+
+              {/* Divider */}
+              <div className="w-px h-5 bg-border-subtle" />
+
+              {/* Today's tasks count */}
+              <div className="text-base text-ink-muted">
+                {todayTaskCount} task{todayTaskCount !== 1 ? 's' : ''} selected
+              </div>
+            </div>
+
+            {/* Clear hint */}
+            <button
+              onClick={() => setUserState(null)}
+              className="text-sm text-ink-faint hover:text-ink-muted transition-colors"
+            >
+              clear
+            </button>
+          </div>
         </div>
       )}
 

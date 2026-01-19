@@ -44,24 +44,24 @@ export function EnergyProgressBar({
       <div className="space-y-1.5">
         {/* Two compact bars stacked */}
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-ink-faint w-12">Capacity</span>
+          <span className="text-xs text-ink-faint w-12">Capacity</span>
           <div className="flex-1 h-1.5 bg-surface-overlay rounded-full overflow-hidden">
             <div
               className="h-full rounded-full bg-emerald-500/40"
               style={{ width: `${capacityPercentage}%` }}
             />
           </div>
-          <span className="text-[10px] text-emerald-400 font-mono w-6 text-right">{total}</span>
+          <span className="text-xs text-emerald-400 font-mono w-6 text-right">{total}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-ink-faint w-12">Planned</span>
+          <span className="text-xs text-ink-faint w-12">Planned</span>
           <div className="flex-1 h-1.5 bg-surface-overlay rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-300 ${getUsedBarColor()}`}
               style={{ width: `${Math.min(usedPercentage, 100)}%` }}
             />
           </div>
-          <span className={`text-[10px] font-mono w-6 text-right ${getUsedTextColor()}`}>{used}</span>
+          <span className={`text-xs font-mono w-6 text-right ${getUsedTextColor()}`}>{used}</span>
         </div>
       </div>
     )
@@ -72,8 +72,8 @@ export function EnergyProgressBar({
       {/* Bar 1: Your Capacity Today - Fixed, always shows total energy */}
       <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-ink-muted">Your Capacity Today</span>
-          <span className="text-xs text-emerald-400 font-mono">{total} points</span>
+          <span className="text-sm text-ink-muted">Your Capacity Today</span>
+          <span className="text-sm text-emerald-400 font-mono">{total} points</span>
         </div>
         <div className="h-2.5 bg-surface-overlay rounded-full overflow-hidden relative">
           {/* Capacity bar - always green, shows total available */}
@@ -87,13 +87,13 @@ export function EnergyProgressBar({
       {/* Bar 2: Tasks Planned - Grows as tasks are added */}
       <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <span className="text-xs text-ink-muted">Tasks Planned</span>
+          <span className="text-sm text-ink-muted">Tasks Planned</span>
           <div className="flex items-center gap-1.5">
-            <span className={`text-xs font-mono ${getUsedTextColor()}`}>
+            <span className={`text-sm font-mono ${getUsedTextColor()}`}>
               {used} / {total} points
             </span>
             {usedOfCapacity > 0 && usedOfCapacity <= 100 && (
-              <span className="text-[10px] text-ink-faint">
+              <span className="text-xs text-ink-faint">
                 ({Math.round(usedOfCapacity)}%)
               </span>
             )}
@@ -124,7 +124,7 @@ export function EnergyProgressBar({
       </div>
 
       {/* Status message */}
-      <div className="flex items-center gap-1.5 text-xs">
+      <div className="flex items-center gap-1.5 text-sm">
         {isOverCapacity ? (
           <>
             <svg className="w-3.5 h-3.5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
