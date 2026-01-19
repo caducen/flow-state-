@@ -33,8 +33,8 @@ export function CheckInSection({ userState, setUserState, tasks, energySettings 
   return (
     <div className="mb-8">
       {/* Question */}
-      <div className="mb-10">
-        <span className="text-base text-ink-muted">How are you feeling?</span>
+      <div className="mb-4">
+        <span className="text-xl font-medium text-ink-rich">How are you feeling?</span>
       </div>
 
       {/* State Buttons */}
