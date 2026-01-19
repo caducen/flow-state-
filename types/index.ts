@@ -16,6 +16,8 @@ export interface EnergySettings {
   energyHigh: number
   energyMed: number
   energyLow: number
+  // Work window (custom active hours)
+  workWindowStart: number // Hour of day (0-23) when 12-hour work window begins
   // Metadata
   customized: boolean
   lastUpdated: string
@@ -31,6 +33,7 @@ export const DEFAULT_ENERGY_SETTINGS: EnergySettings = {
   energyHigh: 3,
   energyMed: 2,
   energyLow: 1,
+  workWindowStart: 7, // Default: 7am to 7pm (traditional work hours)
   customized: false,
   lastUpdated: new Date().toISOString(),
 }

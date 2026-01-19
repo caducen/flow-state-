@@ -226,8 +226,8 @@ export function getFlowMeterPercentage(userState: UserState | null, capacityPerc
 /**
  * Time-Based Check-In Intelligence
  *
- * Active day window: 7am to midnight (17 hours)
- * Energy points scale based on hours remaining in the day
+ * Custom work window: 12 hours starting from user-defined hour
+ * Energy points scale based on hours remaining in the work window
  */
 
 export interface TimeAdjustedEnergy {
@@ -235,29 +235,88 @@ export interface TimeAdjustedEnergy {
   adjustedPoints: number
   hoursRemaining: number
   checkInTime: Date
-  isEarlyBird: boolean // Before 7am
+  isBeforeWindow: boolean // Before work window starts
+  workWindowStart: number
+  workWindowEnd: number
 }
 
 /**
- * Calculate time-adjusted energy points based on hours remaining in day
+ * Calculate hours remaining in the work window
+ * Handles windows that span midnight (e.g., 6pm to 6am)
+ */
+function getHoursRemainingInWindow(
+  currentHour: number,
+  currentMinute: number,
+  windowStart: number
+): { hoursRemaining: number; isBeforeWindow: boolean } {
+  const WORK_WINDOW_HOURS = 12
+  const windowEnd = (windowStart + WORK_WINDOW_HOURS) % 24
+  const currentTime = currentHour + currentMinute / 60
+
+  // Check if window spans midnight
+  const spansMiddnight = windowEnd < windowStart
+
+  let isInWindow: boolean
+  let hoursRemaining: number
+  let isBeforeWindow: boolean
+
+  if (spansMiddnight) {
+    // Window spans midnight (e.g., 18:00 to 06:00)
+    isInWindow = currentTime >= windowStart || currentTime < windowEnd
+    isBeforeWindow = currentTime < windowStart && currentTime >= windowEnd
+
+    if (isInWindow) {
+      if (currentTime >= windowStart) {
+        // After window start, before midnight
+        hoursRemaining = (24 - currentTime) + windowEnd
+      } else {
+        // After midnight, before window end
+        hoursRemaining = windowEnd - currentTime
+      }
+    } else {
+      hoursRemaining = 0
+    }
+  } else {
+    // Window within same day (e.g., 07:00 to 19:00)
+    isInWindow = currentTime >= windowStart && currentTime < windowEnd
+    isBeforeWindow = currentTime < windowStart
+
+    if (isBeforeWindow) {
+      // Before window: full hours available
+      hoursRemaining = WORK_WINDOW_HOURS
+    } else if (isInWindow) {
+      hoursRemaining = windowEnd - currentTime
+    } else {
+      hoursRemaining = 0
+    }
+  }
+
+  return { hoursRemaining: Math.max(0, hoursRemaining), isBeforeWindow }
+}
+
+/**
+ * Calculate time-adjusted energy points based on hours remaining in work window
  * @param basePoints - The base energy points for the selected state
  * @param checkInTime - The time of check-in (defaults to now)
+ * @param workWindowStart - Hour when work window begins (0-23, default 7)
  * @returns Adjusted points (minimum 1)
  */
-export function getTimeAdjustedPoints(basePoints: number, checkInTime: Date = new Date()): number {
+export function getTimeAdjustedPoints(
+  basePoints: number,
+  checkInTime: Date = new Date(),
+  workWindowStart: number = 7
+): number {
   const hour = checkInTime.getHours()
   const minute = checkInTime.getMinutes()
+  const WORK_WINDOW_HOURS = 12
 
-  // Before 7am: full points (early bird bonus)
-  if (hour < 7) return basePoints
+  const { hoursRemaining, isBeforeWindow } = getHoursRemainingInWindow(hour, minute, workWindowStart)
 
-  // Calculate hours from 7am
-  const hoursFrom7am = (hour - 7) + (minute / 60)
-  const totalActiveHours = 17 // 7am to midnight
-  const hoursRemaining = Math.max(0, totalActiveHours - hoursFrom7am)
+  // Before work window: full points
+  if (isBeforeWindow) return basePoints
 
-  // Scale points based on remaining hours
-  const adjustedPoints = basePoints * (hoursRemaining / totalActiveHours)
+  // Scale points based on remaining hours in window
+  const adjustedPoints = basePoints * (hoursRemaining / WORK_WINDOW_HOURS)
 
   // Minimum 1 point (never zero)
   return Math.max(1, Math.round(adjustedPoints))
@@ -267,29 +326,28 @@ export function getTimeAdjustedPoints(basePoints: number, checkInTime: Date = ne
  * Get detailed time information for UI display
  * @param basePoints - The base energy points for the selected state
  * @param checkInTime - The time of check-in (defaults to now)
+ * @param workWindowStart - Hour when work window begins (0-23, default 7)
  */
-export function getTimeInfo(basePoints: number, checkInTime: Date = new Date()): TimeAdjustedEnergy {
+export function getTimeInfo(
+  basePoints: number,
+  checkInTime: Date = new Date(),
+  workWindowStart: number = 7
+): TimeAdjustedEnergy {
   const hour = checkInTime.getHours()
   const minute = checkInTime.getMinutes()
-  const isEarlyBird = hour < 7
+  const WORK_WINDOW_HOURS = 12
+  const workWindowEnd = (workWindowStart + WORK_WINDOW_HOURS) % 24
 
-  let hoursRemaining: number
-
-  if (isEarlyBird) {
-    // Before 7am: treat as full day ahead
-    hoursRemaining = 17
-  } else {
-    // Calculate hours remaining from current time to midnight
-    const hoursFrom7am = (hour - 7) + (minute / 60)
-    hoursRemaining = Math.max(0, 17 - hoursFrom7am)
-  }
+  const { hoursRemaining, isBeforeWindow } = getHoursRemainingInWindow(hour, minute, workWindowStart)
 
   return {
     basePoints,
-    adjustedPoints: getTimeAdjustedPoints(basePoints, checkInTime),
+    adjustedPoints: getTimeAdjustedPoints(basePoints, checkInTime, workWindowStart),
     hoursRemaining: Math.round(hoursRemaining * 10) / 10, // Round to 1 decimal
     checkInTime,
-    isEarlyBird,
+    isBeforeWindow,
+    workWindowStart,
+    workWindowEnd,
   }
 }
 

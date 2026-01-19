@@ -23,8 +23,8 @@ export function CheckInSection({ userState, setUserState, tasks, energySettings 
   // Get base energy balance for the selected state
   const baseEnergyBalance = getEnergyBalance(userState, energySettings)
 
-  // Calculate time-adjusted energy
-  const timeInfo = userState ? getTimeInfo(baseEnergyBalance, currentTime) : null
+  // Calculate time-adjusted energy (respects custom work window)
+  const timeInfo = userState ? getTimeInfo(baseEnergyBalance, currentTime, energySettings.workWindowStart ?? 7) : null
   const energyBalance = timeInfo?.adjustedPoints ?? baseEnergyBalance
 
   const selectedWeight = getSelectedWeight(tasks, energySettings)
@@ -103,8 +103,8 @@ export function CheckInSection({ userState, setUserState, tasks, energySettings 
               <span className="text-ink-faint">Checked in at</span>
               <span className="font-mono text-ink-muted">{formatCheckInTime(currentTime)}</span>
               <span className="text-ink-faint">·</span>
-              {timeInfo.isEarlyBird ? (
-                <span className="text-emerald-400">Early bird! Full energy available</span>
+              {timeInfo.isBeforeWindow ? (
+                <span className="text-emerald-400">Full energy available</span>
               ) : (
                 <>
                   <span className="text-ink-faint">

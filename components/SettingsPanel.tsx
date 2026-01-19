@@ -5,6 +5,18 @@ import { createPortal } from 'react-dom'
 import { USER_STATE_CONFIG, EnergySettings, DEFAULT_ENERGY_SETTINGS } from '@/types'
 import { EnergyCustomizationScreen } from './EnergyCustomizationScreen'
 
+// Helper to format hour as readable time
+function formatHour(hour: number): string {
+  const period = hour >= 12 ? 'PM' : 'AM'
+  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+  return `${displayHour}:00 ${period}`
+}
+
+// Calculate end hour of 12-hour window
+function getWindowEnd(start: number): number {
+  return (start + 12) % 24
+}
+
 interface SettingsPanelProps {
   settings: EnergySettings
   onSettingsChange: (settings: EnergySettings) => void
@@ -201,6 +213,90 @@ export function SettingsPanel({ settings, onSettingsChange, onReset }: SettingsP
                     </svg>
                     Adjust Energy Values
                   </button>
+                </div>
+
+                {/* Divider */}
+                <div className="h-px bg-border-subtle" />
+
+                {/* Work Window Section */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-ink-muted uppercase tracking-wide">
+                      Work Window
+                    </span>
+                    <span className="text-xs text-ink-faint">
+                      12-hour flow period
+                    </span>
+                  </div>
+
+                  {/* Current Window Display */}
+                  <div className="p-3 bg-surface-base rounded-lg space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">🌅</span>
+                        <span className="text-sm text-ink-muted">Start</span>
+                      </div>
+                      <span className="text-sm font-mono font-medium text-amber-glow">
+                        {formatHour(settings.workWindowStart ?? 7)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">🌙</span>
+                        <span className="text-sm text-ink-muted">End</span>
+                      </div>
+                      <span className="text-sm font-mono font-medium text-ink-faint">
+                        {formatHour(getWindowEnd(settings.workWindowStart ?? 7))}
+                      </span>
+                    </div>
+
+                    {/* Slider */}
+                    <div className="pt-2">
+                      <input
+                        type="range"
+                        min="0"
+                        max="23"
+                        value={settings.workWindowStart ?? 7}
+                        onChange={(e) => {
+                          const newStart = parseInt(e.target.value, 10)
+                          onSettingsChange({
+                            ...settings,
+                            workWindowStart: newStart,
+                            customized: true,
+                            lastUpdated: new Date().toISOString(),
+                          })
+                        }}
+                        className="w-full h-2 bg-surface-raised rounded-lg appearance-none cursor-pointer
+                          [&::-webkit-slider-thumb]:appearance-none
+                          [&::-webkit-slider-thumb]:w-5
+                          [&::-webkit-slider-thumb]:h-5
+                          [&::-webkit-slider-thumb]:rounded-full
+                          [&::-webkit-slider-thumb]:bg-amber-glow
+                          [&::-webkit-slider-thumb]:shadow-lg
+                          [&::-webkit-slider-thumb]:cursor-pointer
+                          [&::-webkit-slider-thumb]:transition-transform
+                          [&::-webkit-slider-thumb]:hover:scale-110
+                          [&::-moz-range-thumb]:w-5
+                          [&::-moz-range-thumb]:h-5
+                          [&::-moz-range-thumb]:rounded-full
+                          [&::-moz-range-thumb]:bg-amber-glow
+                          [&::-moz-range-thumb]:border-0
+                          [&::-moz-range-thumb]:shadow-lg
+                          [&::-moz-range-thumb]:cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[10px] text-ink-faint mt-1">
+                        <span>12 AM</span>
+                        <span>6 AM</span>
+                        <span>12 PM</span>
+                        <span>6 PM</span>
+                        <span>11 PM</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-ink-faint leading-relaxed">
+                    Your energy scales within this 12-hour window. Night owls can shift their productive hours to match their rhythm.
+                  </p>
                 </div>
 
                 {/* Divider */}

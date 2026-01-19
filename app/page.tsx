@@ -17,6 +17,18 @@ import { WelcomeScreen } from '@/components/WelcomeScreen'
 import { AmbientBackground } from '@/components/AmbientBackground'
 import { AnimatePresence } from 'framer-motion'
 
+// Helper to format hour as readable time
+function formatHour(hour: number): string {
+  const period = hour >= 12 ? 'PM' : 'AM'
+  const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour
+  return `${displayHour}:00 ${period}`
+}
+
+// Calculate end hour of 12-hour window
+function getWindowEnd(start: number): number {
+  return (start + 12) % 24
+}
+
 export default function Home() {
   const [tasks, setTasks] = useLocalStorage<Task[]>('flow-tasks-v3', [])
   const [quickTodos, setQuickTodos] = useLocalStorage<QuickTodo[]>('flow-quick-todos', [])
@@ -30,6 +42,8 @@ export default function Home() {
   const [showOnboardingModal, setShowOnboardingModal] = useState(false)
   const { settings: energySettings, setSettings: setEnergySettings, resetToDefaults: resetEnergySettings } = useEnergySettings()
   const [currentTime, setCurrentTime] = useState(new Date())
+  const [showInstructions, setShowInstructions] = useState(false)
+  const [instructionsHovered, setInstructionsHovered] = useState(false)
 
   // Update time every minute for real-time accuracy
   useEffect(() => {
@@ -106,8 +120,10 @@ export default function Home() {
   // Calculate energy values for the cursor and progress bar
   const selectedWeight = getSelectedWeight(tasks, energySettings)
   const baseEnergyBalance = getEnergyBalance(userState, energySettings)
-  // Apply time-based adjustment to energy balance
-  const energyBalance = userState ? getTimeAdjustedPoints(baseEnergyBalance, currentTime) : baseEnergyBalance
+  // Apply time-based adjustment to energy balance (respects custom work window)
+  const energyBalance = userState
+    ? getTimeAdjustedPoints(baseEnergyBalance, currentTime, energySettings.workWindowStart ?? 7)
+    : baseEnergyBalance
 
   // Count today's tasks
   const todayTaskCount = tasks.filter(t => t.isTodayTask && t.status === 'active').length
@@ -180,8 +196,34 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Energy Cursor + Recalibrate + Theme Toggle + Settings */}
+            {/* Instructions + Energy Cursor + Recalibrate + Theme Toggle + Settings */}
             <div className="flex items-center gap-3">
+              {/* Instructions Button */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowInstructions(!showInstructions)}
+                  onMouseEnter={() => setInstructionsHovered(true)}
+                  onMouseLeave={() => setInstructionsHovered(false)}
+                  className={`p-2 rounded-lg transition-all group ${
+                    showInstructions
+                      ? 'bg-amber-glow/20 text-amber-glow'
+                      : 'hover:bg-surface-raised text-ink-faint hover:text-ink-muted'
+                  }`}
+                  title="Instructions"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </button>
+
+                {/* Hover tooltip (only when not pinned) */}
+                {instructionsHovered && !showInstructions && (
+                  <div className="absolute right-0 top-full mt-2 w-48 p-2 bg-surface-overlay border border-white/10 rounded-lg shadow-xl z-50">
+                    <p className="text-xs text-ink-muted">Click to show setup instructions</p>
+                  </div>
+                )}
+              </div>
+
               {/* Energy Cursor Checkbox */}
               <label className="flex items-center gap-1.5 cursor-pointer group">
                 <input
@@ -238,6 +280,111 @@ export default function Home() {
             energySettings={energySettings}
           />
         </div>
+
+        {/* Instructions Panel - Pinned */}
+        {showInstructions && (
+          <div className="mb-6 max-w-md animate-fade-in">
+            <div className="bg-surface-base border border-amber-glow/30 rounded-xl p-4 relative">
+              <button
+                onClick={() => setShowInstructions(false)}
+                className="absolute top-3 right-3 p-1 text-ink-faint hover:text-ink-muted transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-amber-glow">💡</span>
+                <span className="text-sm font-medium text-ink-rich">Getting Started</span>
+              </div>
+
+              <ol className="space-y-2 text-sm text-ink-muted">
+                <li className="flex gap-2">
+                  <span className="text-amber-glow font-mono">1.</span>
+                  <span><strong className="text-ink-rich">Check in</strong> — Select how you're feeling today (Grounded, Scattered, or Tired)</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-amber-glow font-mono">2.</span>
+                  <span><strong className="text-ink-rich">Set your window</strong> — Adjust when your 12-hour productive period starts</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-amber-glow font-mono">3.</span>
+                  <span><strong className="text-ink-rich">Add tasks</strong> — Create tasks with priority and energy levels</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-amber-glow font-mono">4.</span>
+                  <span><strong className="text-ink-rich">Star tasks</strong> — Click ⭐ to add tasks to today's plan</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-amber-glow font-mono">5.</span>
+                  <span><strong className="text-ink-rich">Stay balanced</strong> — Keep your energy bar in the green zone</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+        )}
+
+        {/* Work Window Slider */}
+        {userState && (
+          <div className="mb-4 max-w-md animate-fade-in" style={{ animationDelay: '0.08s' }}>
+            <div className="bg-surface-base border-subtle rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">⏰</span>
+                  <span className="text-sm font-medium text-ink-rich">Work Window</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-ink-faint">🌅</span>
+                  <span className="font-mono text-amber-glow">{formatHour(energySettings.workWindowStart ?? 7)}</span>
+                  <span className="text-ink-faint">→</span>
+                  <span className="text-ink-faint">🌙</span>
+                  <span className="font-mono text-ink-muted">{formatHour(getWindowEnd(energySettings.workWindowStart ?? 7))}</span>
+                </div>
+              </div>
+
+              <input
+                type="range"
+                min="0"
+                max="23"
+                value={energySettings.workWindowStart ?? 7}
+                onChange={(e) => {
+                  const newStart = parseInt(e.target.value, 10)
+                  setEnergySettings({
+                    ...energySettings,
+                    workWindowStart: newStart,
+                    customized: true,
+                    lastUpdated: new Date().toISOString(),
+                  })
+                }}
+                className="w-full h-2 bg-surface-raised rounded-lg appearance-none cursor-pointer
+                  [&::-webkit-slider-thumb]:appearance-none
+                  [&::-webkit-slider-thumb]:w-5
+                  [&::-webkit-slider-thumb]:h-5
+                  [&::-webkit-slider-thumb]:rounded-full
+                  [&::-webkit-slider-thumb]:bg-amber-glow
+                  [&::-webkit-slider-thumb]:shadow-lg
+                  [&::-webkit-slider-thumb]:cursor-pointer
+                  [&::-webkit-slider-thumb]:transition-transform
+                  [&::-webkit-slider-thumb]:hover:scale-110
+                  [&::-moz-range-thumb]:w-5
+                  [&::-moz-range-thumb]:h-5
+                  [&::-moz-range-thumb]:rounded-full
+                  [&::-moz-range-thumb]:bg-amber-glow
+                  [&::-moz-range-thumb]:border-0
+                  [&::-moz-range-thumb]:shadow-lg
+                  [&::-moz-range-thumb]:cursor-pointer"
+              />
+              <div className="flex justify-between text-[10px] text-ink-faint mt-1">
+                <span>12AM</span>
+                <span>6AM</span>
+                <span>12PM</span>
+                <span>6PM</span>
+                <span>11PM</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Energy Bar & Today's Plan */}
         {userState && (
