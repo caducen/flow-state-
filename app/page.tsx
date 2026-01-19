@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 import { useEnergySettings } from '@/hooks/useEnergySettings'
 import { Task, Label, UserState, DEFAULT_LABELS, EnergySettings } from '@/types'
-import { getSelectedWeight, getEnergyBalance } from '@/utils/flowMeter'
+import { getSelectedWeight, getEnergyBalance, getTimeAdjustedPoints } from '@/utils/flowMeter'
 import { TaskList } from '@/components/TaskList'
 import { QuickTodos, QuickTodo } from '@/components/QuickTodos'
 import { CheckInSection } from '@/components/CheckInSection'
@@ -24,6 +24,13 @@ export default function Home() {
   const [promotedTodo, setPromotedTodo] = useState<{ text: string; id: string } | null>(null)
   const [showOnboardingModal, setShowOnboardingModal] = useState(false)
   const { settings: energySettings, setSettings: setEnergySettings, resetToDefaults: resetEnergySettings } = useEnergySettings()
+  const [currentTime, setCurrentTime] = useState(new Date())
+
+  // Update time every minute for real-time accuracy
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(new Date()), 60000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Migrate old tasks to new format (add progress field)
   useEffect(() => {
@@ -72,7 +79,9 @@ export default function Home() {
 
   // Calculate energy values for the cursor and progress bar
   const selectedWeight = getSelectedWeight(tasks, energySettings)
-  const energyBalance = getEnergyBalance(userState, energySettings)
+  const baseEnergyBalance = getEnergyBalance(userState, energySettings)
+  // Apply time-based adjustment to energy balance
+  const energyBalance = userState ? getTimeAdjustedPoints(baseEnergyBalance, currentTime) : baseEnergyBalance
 
   // Count today's tasks
   const todayTaskCount = tasks.filter(t => t.isTodayTask && t.status === 'active').length
