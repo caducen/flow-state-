@@ -21,26 +21,20 @@ export function WelcomeScreen({ onSelectState, energySettings = DEFAULT_ENERGY_S
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-surface-deep"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center"
     >
-      {/* Ambient gradient background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div
-          className="absolute w-[600px] h-[600px] rounded-full blur-3xl opacity-20"
-          style={{
-            background: 'radial-gradient(circle, rgba(126, 168, 143, 0.4) 0%, transparent 70%)',
-            top: '10%',
-            left: '10%',
-          }}
+      {/* Video Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <video
+          src="/welcome-bg.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
         />
-        <div
-          className="absolute w-[400px] h-[400px] rounded-full blur-3xl opacity-15"
-          style={{
-            background: 'radial-gradient(circle, rgba(92, 158, 207, 0.4) 0%, transparent 70%)',
-            bottom: '20%',
-            right: '15%',
-          }}
-        />
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-surface-deep/70" />
       </div>
 
       {/* Header */}

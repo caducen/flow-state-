@@ -114,6 +114,20 @@ export default function Home() {
 
   return (
     <>
+      {/* Dashboard Video Background */}
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <video
+          src="/dashboard-bg.mp4"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-surface-deep/60" />
+      </div>
+
       {/* Ambient Background - Drifting orbs */}
       <AmbientBackground />
 
@@ -142,7 +156,7 @@ export default function Home() {
         maxEnergy={energySettings.grounded}
       />
 
-      <div className="min-h-screen p-4 md:p-6 lg:p-10">
+      <div className="min-h-screen p-4 md:p-6 lg:p-10 relative z-10">
         {/* Header */}
         <header className="mb-8 animate-fade-in">
           <div className="flex items-start justify-between">
